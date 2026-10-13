@@ -1,0 +1,279 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="arch-v2" name="System Architecture">
+    <mxGraphModel page="1" pageWidth="1840" pageHeight="1490">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="SWIFTLETCARE · KIẾN TRÚC TỔNG THỂ" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=29;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="1780" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="Đối chiếu FR/NFR tại commit 9ee2786 · Thiết kế mục tiêu, chưa phải hệ thống đã triển khai" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="30" y="78" width="1780" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#ecfdf5;strokeColor=#6ee7b7;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="30" y="135" width="470" height="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#eff6ff;strokeColor=#93c5fd;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="620" y="135" width="700" height="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#faf5ff;strokeColor=#c4b5fd;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="135" width="410" height="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="DEVICE / EDGE · TẠI NHÀ YẾN" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=19;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="145" width="450" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="8" value="COMMUNICATION · BACKEND · DATA" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=19;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="630" y="145" width="680" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="9" value="PRESENTATION / PUSH" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=19;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1410" y="145" width="390" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="10" value="Cảm biến&#10;Nhiệt độ • độ ẩm • CO₂ • ánh sáng" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="210" width="380" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="ESP32 / mô phỏng Wokwi&#10;AUTO/MANUAL • ngưỡng lưu cục bộ&#10;AUTO offline ≥24 giờ khi còn nguồn&#10;Buffer ≥17.280 bản ghi / luồng (5s)&#10;Reconnect • gửi bù • eventId" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#d1fae5;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="75" y="370" width="380" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="Relay → thiết bị chấp hành&#10;Phun sương • quạt • sưởi • loa" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="610" width="380" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="13" value="Camera / video mô phỏng&#10;Nguồn hình ảnh trong LAN" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="800" width="380" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="14" value="AI Service · máy edge riêng (*)&#10;YOLOv8 + ByteTrack + Entry/Exit&#10;Count • anomaly • snapshot&#10;Không chạy AI này trên ESP32" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#d1fae5;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="75" y="1040" width="380" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="MQTT Broker&#10;Mosquitto (*)&#10;Xác thực thiết bị + ACL&#10;Telemetry / heartbeat&#10;Command / ACK" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#dbeafe;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="650" y="370" width="240" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="16" value="" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#dbeafe;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="980" y="300" width="300" height="460" as="geometry" />
+        </mxCell>
+        <mxCell id="17" value="Spring Boot Backend&#10;Modular monolith (*)" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=20;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="990" y="310" width="280" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="REST API + MQTT client&#10;Token • RBAC • quyền nhà yến&#10;Kiểm tra schema / chống trùng" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=15;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="395" width="260" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="19" value="User / House / Zone / Device&#10;Telemetry • AI events • báo cáo&#10;Alert • điều phối Notification" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=15;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="510" width="260" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="WebSocket endpoint&#10;Telemetry • ACK • alert" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="645" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="Database&#10;PostgreSQL (*)&#10;User / House / Zone / Device&#10;Lịch sử • AI events • alerts" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=16;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="650" y="1040" width="270" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="Kho ảnh bằng chứng&#10;MinIO (*) / S3 theo FR&#10;Ảnh riêng tư; DB lưu metadata&#10;Truy cập có kiểm soát" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=16;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="990" y="1040" width="290" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="React Web Dashboard&#10;Đăng nhập • quản lý • điều khiển&#10;Thông số • count • cảnh báo&#10;Browser trên PC / mobile&#10;Dữ liệu realtime cần Backend" style="rounded=0;whiteSpace=wrap;html=0;fillColor=#ede9fe;strokeColor=#94a3b8;fontSize=18;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="300" width="330" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="Notification Service&#10;Web Push + Mobile Push&#10;Đề xuất nhà cung cấp: FCM (*)&#10;Retry có giới hạn + chống trùng" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=16;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="645" width="330" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="Trình duyệt / thiết bị di động&#10;Nhận thông báo đã đăng ký" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="835" width="330" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="26" value="Media gateway (*)&#10;Live View khi được yêu cầu&#10;Kiểm tra quyền trước mở phiên" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=#94a3b8;fontSize=17;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="1080" width="330" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="27" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="265" y="295" as="sourcePoint" />
+            <mxPoint x="265" y="370" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="28" value="Giao tiếp cảm biến" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="280" y="310" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="29" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="265" y="525" as="sourcePoint" />
+            <mxPoint x="265" y="610" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="30" value="GPIO • kiểm tra an toàn" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="275" y="550" width="190" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="31" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="455" y="410" as="sourcePoint" />
+            <mxPoint x="650" y="410" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="32" value="MQTTS → telemetry&#10;heartbeat / ACK / gửi bù" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="459" y="344" width="185" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="33" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="490" as="sourcePoint" />
+            <mxPoint x="455" y="490" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="34" value="MQTTS → command&#10;cấu hình / ACK lưu dữ liệu" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="459" y="525" width="185" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="35" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="890" y="410" as="sourcePoint" />
+            <mxPoint x="980" y="410" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="36" value="MQTTS" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="891" y="372" width="86" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="37" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="980" y="490" as="sourcePoint" />
+            <mxPoint x="890" y="490" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="38" value="MQTTS" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="891" y="500" width="86" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="39" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1440" y="350" as="sourcePoint" />
+            <mxPoint x="1280" y="350" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="40" value="HTTPS REST&#10;Quản lý / command" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1283" y="275" width="154" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="41" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1280" y="685" as="sourcePoint" />
+            <mxPoint x="1440" y="445" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1350" y="685" />
+              <mxPoint x="1350" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="42" value="WSS → dữ liệu&#10;trạng thái / alert" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1328" y="506" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="43" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1280" y="565" as="sourcePoint" />
+            <mxPoint x="1440" y="700" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1385" y="565" />
+              <mxPoint x="1385" y="700" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="44" value="HTTPS API&#10;Gửi push" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1325" y="584" width="112" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="45" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1605" y="760" as="sourcePoint" />
+            <mxPoint x="1605" y="835" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="46" value="Push qua Internet" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1610" y="772" width="172" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="47" edge="1" parent="1" style="endArrow=block;startArrow=block;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1050" y="760" as="sourcePoint" />
+            <mxPoint x="785" y="1040" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1050" y="915" />
+              <mxPoint x="785" y="915" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="48" value="SQL / JDBC&#10;Đọc và ghi" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="670" y="863" width="175" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="49" edge="1" parent="1" style="endArrow=block;startArrow=block;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1190" y="760" as="sourcePoint" />
+            <mxPoint x="1190" y="1040" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="50" value="HTTPS S3 API&#10;Lưu / lấy ảnh" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="930" width="110" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="51" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="265" y="880" as="sourcePoint" />
+            <mxPoint x="265" y="1040" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="52" value="RTSP / frame trong LAN" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="70" y="972" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="53" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="455" y="1090" as="sourcePoint" />
+            <mxPoint x="1110" y="760" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="550" y="1090" />
+              <mxPoint x="550" y="835" />
+              <mxPoint x="1110" y="835" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="54" value="HTTPS REST → count / anomaly / snapshot&#10;Token dịch vụ • retry • eventId" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="600" y="771" width="390" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="55" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="455" y="840" as="sourcePoint" />
+            <mxPoint x="1440" y="1125" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="520" y="840" />
+              <mxPoint x="520" y="985" />
+              <mxPoint x="1380" y="985" />
+              <mxPoint x="1380" y="1125" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="56" value="RTSP tới gateway · chỉ khi có phiên Live View (*)" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="650" y="953" width="480" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="57" edge="1" parent="1" style="endArrow=block;startArrow=none;strokeWidth=1.6;strokeColor=#475569;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1770" y="1125" as="sourcePoint" />
+            <mxPoint x="1770" y="400" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1790" y="1125" />
+              <mxPoint x="1790" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="58" value="HTTPS/HLS (*)" style="rounded=0;whiteSpace=wrap;html=0;fillColor=white;strokeColor=none;fontSize=13;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="1620" y="1190" width="165" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="59" value="AUTO cục bộ: ESP32 + cảm biến + relay.&#10;AI edge cần nguồn/LAN; lưu bù AI chưa chốt." style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=15;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="50" y="1190" width="430" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="60" value="Server: Broker, Backend, Database, kho ảnh.&#10;Web/Push không realtime khi mất đường kết nối máy chủ." style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=16;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1190" width="670" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="61" value="NFR: Broker → Dashboard ≤2s  |  AI phát sự kiện → mobile ≤5s  |  Giảm băng thông ≥90% / 1 giờ" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=20;fontFamily=Arial;fontColor=#172554;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1300" width="1780" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="62" value="(*) Lựa chọn đề xuất cần nhóm duyệt; các thành phần bắt buộc giữ theo FR/NFR. Nét đứt: đường video theo yêu cầu.&#10;MQTTS = MQTT/TLS; WSS = WebSocket/TLS. ACK MQTT không thay thế ACK ứng dụng sau khi Database lưu thành công.&#10;Chi tiết các luồng, quyết định và điểm còn mở: system-architecture-notes.md" style="rounded=0;whiteSpace=wrap;html=0;fillColor=none;strokeColor=none;fontSize=16;fontFamily=Arial;fontColor=#172554;" vertex="1" parent="1">
+          <mxGeometry x="30" y="1360" width="1780" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
