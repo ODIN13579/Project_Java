@@ -1,27 +1,37 @@
-# CÁC QUYẾT ĐỊNH CÒN MỞ — TASK-11 SWIFTLETCARE
+# AI Open Decisions — SwiftletCare
 
-**Mục đích:** Theo dõi các nội dung cần thống nhất trước khi xem đặc tả dữ liệu và kế hoạch đánh giá là hoàn tất.
+Danh sách các quyết định chưa được chốt trong TASK-11. Không coi các đề xuất dưới đây là yêu cầu đã phê duyệt.
 
-| Mã | Nội dung cần quyết định | Người phối hợp | Kết quả cần có |
-|---|---|---|---|
-| D-01 | Video nhà yến thực tế và video TASK-S2 nào có sẵn, được phép sử dụng? | P2 và nhóm | Danh mục đã kiểm tra, số lượng, đường dẫn và quyền sử dụng |
-| D-02 | Chọn bộ dữ liệu công khai/trọng số mô hình nào, giấy phép cho phép những gì? | P2 | Đường dẫn, phiên bản, giấy phép và hạn chế |
-| D-03 | Danh sách lớp cuối cùng có phải `swiftlet`, `snake`, `rat`, `owl` không? Có cần lớp chim khác hoặc quy tắc bỏ qua không? | P2 + P3 | Danh sách lớp được duyệt |
-| D-04 | Quy tắc về kích thước, che khuất, vùng quan tâm và đối tượng không rõ là gì? | P2 + P3 | Hướng dẫn gán nhãn được duyệt |
-| D-05 | Đường đếm và quy ước phía trong/ngoài của từng camera là gì? | P2 + P3 | Cấu hình đường đếm và quy tắc gán nhãn sự kiện |
-| D-06 | Dữ liệu có bao nhiêu mẫu và các lớp/điều kiện có đủ trong Validation và Test không? | P2 | Thống kê theo lớp, nguồn và tập dữ liệu |
-| D-07 | Tỷ lệ chia 70/20/10 có phù hợp với dữ liệu thực tế không? | P2 | Kế hoạch chia và danh sách phân chia được duyệt |
-| D-08 | Khoảng thời gian ghép sự kiện và ngưỡng Count MAE nghiệm thu là bao nhiêu? | P2 + P3 | Quy tắc nghiệm thu định lượng |
-| D-09 | Thiết bị, độ phân giải, FPS/độ trễ và điều kiện kiểm tra nào được dùng để nghiệm thu? | P2 + P3 | Quy trình đánh giá có thể lặp lại |
-| D-10 | Tên trường sự kiện, giao thức truyền, nơi lưu bằng chứng, gửi lại và chống trùng ra sao? | P2 + P4 | Quy ước dữ liệu sự kiện được Backend xác nhận |
-| D-11 | Khi mất mạng, nút biên lưu tạm và đồng bộ sự kiện thế nào để không bị trùng? | P2 + P4 | Quy tắc hoạt động ngoại tuyến và đồng bộ |
-| D-12 | Quy trình rà soát nhãn và tỷ lệ bất đồng cho phép là bao nhiêu? | P2 + P3 | Quy trình kiểm soát chất lượng được thống nhất |
+| ID | Vấn đề cần quyết định | Đề xuất hiện tại | Người phối hợp | Điều kiện đóng |
+|---|---|---|---|---|
+| OD-01 | Video TASK-S2 ở đâu, có bao nhiêu clip và được phép dùng không? | Kiểm kê file, duration, FPS, camera, quyền sở hữu | P2 + P3 | Có manifest và xác nhận quyền dùng |
+| OD-02 | Có video thực tế từ nhà yến không? | Ưu tiên camera thực tế cho holdout test | P2 + chủ trang trại | Có nguồn, giấy phép/đồng ý và điều kiện ghi hình |
+| OD-03 | Class `swiftlet` có thể xác định chắc từ dữ liệu công khai không? | Giữ `bird` tách biệt; không tự map thành `swiftlet` | P2 + P3 | Có định nghĩa class và ví dụ đã review |
+| OD-04 | Class cuối cùng là `swiftlet`, `snake`, `rat`, `owl` hay có `bird/unknown`? | Bắt đầu với bốn class mục tiêu; không thêm unknown khi chưa có quy tắc | P2 + P3 | Class map/version được duyệt |
+| OD-05 | Quy tắc đối tượng nhỏ, mờ, che khuất, ngoài ROI? | Áp dụng `ai-annotation-guideline.md` bản draft | P2 | Annotators thống nhất và có ví dụ biên |
+| OD-06 | Tỷ lệ chia tập và đơn vị nhóm? | 70/20/10 theo video/session/camera-ngày | P2 + P3 | Split manifest không rò rỉ |
+| OD-07 | Dataset công khai nào được phê duyệt? | Review license/version/citation trước khi import | P2 | Có log tải và license review |
+| OD-08 | Ground truth Entry/Exit và tolerance thời gian? | Event-level matching với `±Δt`, chốt trước test | P2 + P3 | Định nghĩa line, sides, ambiguous và Δt được duyệt |
+| OD-09 | Chỉ số nghiệm thu chính cho Entry/Exit? | Event Precision/Recall/F1 + Count MAE theo hướng | P2 + P3 | Protocol được thống nhất |
+| OD-10 | Latency đo từ đâu đến đâu? | Đo frame receipt đến Backend/mobile receipt; báo p50/p95/p99 | P2 + P4 | Timestamp và tải thử nghiệm được chốt |
+| OD-11 | Schema event và naming chính thức? | Draft `schemaVersion=1.0` trong event contract | P2 + P4 | P4 duyệt fields, enums, transport và API mapping |
+| OD-12 | Evidence lưu ở đâu và bao lâu? | URI tham chiếu có ACL, không nhúng media vào event | P4 + chủ trang trại | Có storage, retention, permission và retry policy |
+| OD-13 | Event deduplication và track/session lifecycle? | `eventId` idempotent + `trackingSessionId` | P2 + P4 | Có quy tắc khi restart, reconnect và mất track |
+| OD-14 | Mục tiêu Precision/Recall có được nghiệm thu ngay không? | Xem là target dự kiến, không phải kết quả | P2 + P3 | Có test độc lập và báo cáo đo lường |
+| OD-15 | Có thể chia sẻ dataset đã gán nhãn ra ngoài repository không? | Chỉ chia sẻ sau khi xác nhận license và quyền của từng nguồn | P2 + nhóm | Có quyết định bằng văn bản |
 
-## Điều kiện sẵn sàng chuyển sang giai đoạn BUILD
+## Ưu tiên xử lý
 
-- Nguồn dữ liệu dự kiến đã được kiểm tra và xác nhận quyền sử dụng.
-- Danh sách lớp và quy tắc gán nhãn được thống nhất.
-- Định dạng dữ liệu và cách chia tập đã được ghi rõ.
-- Chỉ số đánh giá, cách tạo dữ liệu chuẩn và ngưỡng nghiệm thu được thống nhất.
-- Trường dữ liệu AI gửi Backend cùng quy tắc gửi lại/chống trùng đã được rà soát.
-- Dữ liệu còn thiếu và quyết định chưa chốt được ghi rõ; không báo cáo mục tiêu chưa đo là kết quả đã đạt.
+1. **Nguồn dữ liệu và quyền sử dụng** — đặc biệt video TASK-S2 và video nhà yến.
+2. **Class map và annotation guideline** — trước khi gán nhãn hàng loạt.
+3. **Split theo nguồn/video/session** — trước khi chọn model hoặc tune threshold.
+4. **Ground truth và protocol đánh giá** — trước khi báo cáo chỉ số.
+5. **Event schema/evidence lifecycle** — chốt với P4 trước tích hợp Backend.
+
+## Ngoài phạm vi TASK-11
+
+- Huấn luyện mô hình production hoàn chỉnh.
+- Thu thập dữ liệu quy mô lớn.
+- Cam kết đạt Precision/Recall khi chưa đo trên test độc lập.
+- Chốt endpoint/API chi tiết thay cho TASK-05.
+- Khẳng định dataset public tổng quát hóa được cho camera nhà yến nếu chưa có đánh giá thực tế.
