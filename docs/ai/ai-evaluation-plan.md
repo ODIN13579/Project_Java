@@ -1,86 +1,147 @@
-# AI Evaluation Plan — SwiftletCare
+# AI Event Data Contract — SwiftletCare
 
-## 1. Phạm vi
+## 1. Mục đích và nguyên tắc
 
-Đánh giá riêng: (A) phát hiện chim yến, (B) phát hiện thiên địch, (C) tracking/Entry-Exit và (D) latency từ xử lý đến Backend. Kết quả phải đo trên test độc lập; không suy ra hiệu năng từ tên kiến trúc hoặc số liệu model/dataset công khai.
+Đề xuất hợp đồng dữ liệu giữa AI Service/Edge Node và Backend. Đây là **draft để P2 và P4 thống nhất**, chưa phải API chính thức của TASK-05. Chi tiết endpoint, authentication và transport do Backend chốt riêng.
 
-## 2. Ground truth
+Nguyên tắc:
+- Mỗi event có ID ổn định để chống xử lý trùng.
+- Timestamp ISO 8601 có timezone; khuyến nghị UTC (`Z`) khi truyền.
+- `cameraId` và `zoneId` là ID đã đăng ký với Backend.
+- Ảnh evidence dùng URI tham chiếu có kiểm soát quyền truy cập; không nhúng ảnh/video base64 vào event.
+- Track ID chỉ có ý nghĩa trong tracking session.
+- Payload cần có version schema.
 
-- **Detection:** bounding box và class được gán nhãn theo `ai-annotation-guideline.md`; test labels đã review.
-- **Entry/Exit:** người gán nhãn xác định từng lượt qua đường đếm, timestamp/frame, camera/zone, direction và trường hợp ambiguous. Hai người rà soát các đoạn test quan trọng.
-- **Latency:** đồng bộ timestamp trên thiết bị xử lý và Backend; ghi lại thời điểm frame được nhận, inference xong, event được tạo/gửi và Backend nhận.
-- Báo cáo số lượng ảnh, video, box, event, camera/session và trường hợp bị loại khỏi đánh giá.
+## 2. Event type đề xuất
 
-## 3. Chỉ số detection
+- `PREDATOR_DETECTED`
+- `BIRD_ENTRY`
+- `BIRD_EXIT`
+- Có thể bổ sung `BIRD_COUNT_SNAPSHOT` khi Backend cần thống kê theo cửa sổ; không dùng snapshot thay cho event từng lượt.
 
-Với IoU threshold đã thống nhất, dự đoán được ghép với ground truth cùng class. Một dự đoán đúng (TP) phải vượt IoU threshold và được ghép một-một; dự đoán dư là FP; ground truth bị bỏ sót là FN.
+## 3. Schema JSON minh họa
 
-- `Precision = TP / (TP + FP)`
-- `Recall = TP / (TP + FN)`
-- `mAP@0.5`: mean Average Precision với IoU = 0.50.
-- `mAP@0.5:0.95`: mAP trung bình trên IoU 0.50 đến 0.95, bước 0.05.
+```json
+{
+  "schemaVersion": "1.0",
+  "eventId": "0199-example-unique-id",
+  "eventType": "PREDATOR_DETECTED",
+  "timestamp": "2026-10-15T10:20:30.123Z",
+  "producer": {
+    "service": "swiftletcare-ai",
+    "modelVersion": "model-version",
+    "trackingSessionId": "session-20261015-01"
+  },
+  "cameraId": "camera-01",
+  "zoneId": "zone-01",
+  "object": {
+    "className": "snake",
+    "confidence": 0.91,
+    "trackId": "track-17",
+    "bbox": {
+      "format": "xyxy",
+      "x1": 120,
+      "y1": 80,
+      "x2": 220,
+      "y2": 190,
+      "imageWidth": 1280,
+      "imageHeight": 720
+    }
+  },
+  "crossing": null,
+  "evidence": {
+    "evidenceId": "evidence-0199-example",
+    "uri": "https://storage.example.invalid/evidence/file.jpg",
+    "mediaType": "image/jpeg",
+    "capturedAt": "2026-10-15T10:20:30.123Z",
+    "sha256": "replace-with-real-sha256"
+  },
+  "deduplicationKey": "camera-01:session-20261015-01:track-17:PREDATOR_DETECTED",
+  "traceId": "trace-example"
+}
+```
 
-Báo cáo theo từng class và overall; ghi confidence threshold, IoU matching, image size, model version, hardware và điều kiện chạy. Nếu mẫu số bằng 0, ghi N/A, không thay bằng 0 tùy ý.
+URI và ID ở trên chỉ là placeholder, không phải endpoint hay file thật.
 
-## 4. Mục tiêu dự kiến — chưa phải kết quả
+## 4. Quy tắc trường
 
-| Hạng mục | Mục tiêu dự kiến |
-|---|---:|
-| Bird / swiftlet detection Precision | ≥ 85% |
-| Bird / swiftlet detection Recall | ≥ 80% |
-| Predator detection Precision | ≥ 80% |
-| Predator detection Recall | ≥ 75% |
+| Trường | Bắt buộc | Quy tắc |
+|---|---|---|
+| `schemaVersion` | Có | Version schema để tương thích ngược |
+| `eventId` | Có | ID duy nhất cho một event; tạo trước khi publish và giữ nguyên khi retry |
+| `eventType` | Có | Enum đã thống nhất |
+| `timestamp` | Có | ISO 8601 có timezone; thống nhất timestamp của crossing/detection |
+| `cameraId`, `zoneId` | Có | ID đã đăng ký; không dùng tên hiển thị tùy ý |
+| `producer.service` | Có | Tên service tạo event |
+| `producer.modelVersion` | Có với AI event | Version checkpoint/model hoặc `unknown` khi chưa có |
+| `producer.trackingSessionId` | Có cho Entry/Exit | Định danh phiên tracking |
+| `object.className`, `confidence` | Có cho object event | Class trong class map; confidence nằm trong [0,1] |
+| `object.trackId` | Có cho Entry/Exit; nếu có cho detection | Chỉ duy nhất trong session, không phải ID chim vĩnh viễn |
+| `object.bbox` | Có nếu có detection box | Hệ tọa độ `xyxy`, pixel trên ảnh gốc; tọa độ và kích thước ảnh phải cùng hệ |
+| `crossing.direction` | Có cho Entry/Exit | `ENTRY` hoặc `EXIT` |
+| `crossing.lineId` | Có cho Entry/Exit | ID đường đếm đã cấu hình |
+| `evidence.uri` | Theo chính sách event | URI nội bộ hoặc URL ký hạn; phải có kiểm soát truy cập/retention |
+| `deduplicationKey` | Khuyến nghị | Giúp chống tạo event nghiệp vụ trùng; quy tắc cụ thể cần P4 chốt |
+| `traceId` | Khuyến nghị | Theo dõi event qua AI và Backend |
 
-Các giá trị trên là mục tiêu thiết kế từ đề bài TASK-11, chưa phải kết quả đo. Cần chốt test set, protocol và ngưỡng trước nghiệm thu. mAP là chỉ số bổ sung; không tự đặt mức đạt nếu nhóm chưa thống nhất.
+## 5. Ví dụ Entry/Exit
 
-## 5. Đánh giá đếm chim và Entry/Exit
+```json
+{
+  "schemaVersion": "1.0",
+  "eventId": "0199-entry-example",
+  "eventType": "BIRD_ENTRY",
+  "timestamp": "2026-10-15T10:20:31.500Z",
+  "producer": {
+    "service": "swiftletcare-ai",
+    "modelVersion": "yolo-version+tracker-version",
+    "trackingSessionId": "session-20261015-01"
+  },
+  "cameraId": "camera-01",
+  "zoneId": "zone-01",
+  "object": {
+    "className": "swiftlet",
+    "confidence": 0.88,
+    "trackId": "track-42",
+    "bbox": {
+      "format": "xyxy",
+      "x1": 310,
+      "y1": 160,
+      "x2": 350,
+      "y2": 205,
+      "imageWidth": 1280,
+      "imageHeight": 720
+    }
+  },
+  "crossing": {
+    "direction": "ENTRY",
+    "lineId": "entrance-line-01",
+    "fromSide": "OUTSIDE",
+    "toSide": "INSIDE",
+    "crossingTimestamp": "2026-10-15T10:20:31.500Z"
+  },
+  "evidence": {
+    "evidenceId": "evidence-entry-example",
+    "uri": "https://storage.example.invalid/evidence/entry.jpg",
+    "mediaType": "image/jpeg",
+    "capturedAt": "2026-10-15T10:20:31.500Z"
+  },
+  "deduplicationKey": "camera-01:session-20261015-01:track-42:entrance-line-01:ENTRY"
+}
+```
 
-### Count MAE
+## 6. Chống trùng và retry
 
-Tính trên các cửa sổ thời gian hoặc clip được định nghĩa trước:
+- Producer tạo `eventId` trước lần gửi đầu tiên; retry cùng event phải dùng lại `eventId`.
+- Backend nên xử lý idempotent theo `eventId`; uniqueness scope và retention do P4 chốt.
+- `deduplicationKey` hỗ trợ phát hiện cùng track qua cùng line/hướng trong một session, nhưng không thay thế `eventId`.
+- Nếu track ID bị reset sau mất kết nối/restart, session mới phải có `trackingSessionId` mới.
+- Không gộp hai lượt chim khác nhau chỉ vì chúng đi qua cùng camera trong thời gian gần nhau.
+- Evidence upload thất bại không được âm thầm làm mất event; chính sách retry/evidence-missing phải được chốt.
 
-`Count MAE = mean(|predicted_count - ground_truth_count|)`
+## 7. Bảo mật và lưu trữ
 
-Báo cáo riêng số chim theo từng hướng (ENTRY, EXIT), theo clip/camera và tổng hợp. Ghi độ dài cửa sổ; không so sánh các cửa sổ có độ dài khác nhau mà không chuẩn hóa.
-
-### Entry/Exit event metrics
-
-So khớp event dự đoán với ground truth cùng `camera_id`, `zone_id`, `direction` trong cửa sổ thời gian `±Δt` được chốt trước khi test:
-- Event Precision = số event dự đoán ghép đúng / tổng event dự đoán.
-- Event Recall = số event ground truth được ghép / tổng event ground truth.
-- Event F1 = harmonic mean của precision và recall.
-- Count MAE theo ENTRY/EXIT và tổng số lượt.
-- Báo cáo số event trùng, bỏ sót, sai hướng, event ngoài cửa sổ thời gian và clip ambiguous.
-
-“Entry/Exit accuracy” không nên chỉ là phần trăm tổng số đếm đúng. Báo cáo tối thiểu event precision/recall/F1 và count MAE, đồng thời định nghĩa rõ phép ghép event và `Δt`.
-
-### Tracking
-
-Có thể bổ sung IDF1/HOTA hoặc ID switches nếu công cụ và ground truth cho phép. Track ID nội bộ không phải ID chim vĩnh viễn. Không đánh giá logic đếm chỉ bằng mAP detection.
-
-## 6. Đánh giá cảnh báo thiên địch
-
-Ngoài Precision/Recall theo class, ghi:
-- False alerts trên mỗi giờ video không có thiên địch.
-- Thời gian từ lúc đối tượng xuất hiện trong ground truth đến khi Backend nhận event.
-- Số trường hợp bỏ sót, cảnh báo trùng và cảnh báo sai class.
-- Kết quả riêng cho ngày/đêm, che khuất, vật thể nhỏ và từng camera.
-
-## 7. Latency và NFR
-
-NFR trong đề xuất: dữ liệu sensor hiển thị trong 2 giây; cảnh báo/đếm từ camera đến thiết bị trong khoảng 3–5 giây. Đây là mục tiêu hệ thống cần kiểm chứng, không phải mặc định đạt được.
-
-Định nghĩa:
-- `T0`: timestamp frame được nhận tại node xử lý.
-- `T1`: inference/tracking hoàn tất.
-- `T2`: event được publish.
-- `T3`: Backend nhận và xác thực event.
-- `T4`: Dashboard/mobile nhận được cập nhật (nếu có telemetry).
-
-Báo cáo `T3-T0` và `T4-T0` bằng p50, p95, p99 và tỷ lệ event trong ngưỡng. Đo trên hardware mục tiêu, resolution/FPS đã chốt, tải mạng thực tế; nêu rõ thời gian warm-up, số lần chạy, mất mạng và retry. Kiểm tra edge vẫn điều khiển tại chỗ khi mất Internet theo NFR, nhưng đây là kiểm thử tích hợp riêng với phần IoT/control.
-
-## 8. Báo cáo tái lập
-
-Mỗi lần chạy ghi: `dataset_version`, split manifest hash, model/checkpoint, code commit, confidence/IoU thresholds, hardware, runtime, image size, batch size, video FPS, test date, per-class metrics, confusion cases và giới hạn mẫu.
-
-Không chỉnh threshold trên test. Nếu thay đổi model/threshold sau khi xem test, cần test holdout mới hoặc ghi rõ test đã bị dùng để phát triển.
+- Không gửi API key, mật khẩu hoặc thông tin nhạy cảm trong payload.
+- Evidence URI phải được bảo vệ, thời hạn truy cập và thời gian lưu do P4/chủ trang trại thống nhất.
+- Backend xác thực camera/service và kiểm tra enum, timestamp, confidence, kích thước bbox, schema version.
+- Thay đổi breaking schema phải tăng major version hoặc được thống nhất tương thích.
