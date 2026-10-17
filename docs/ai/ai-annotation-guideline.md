@@ -1,51 +1,56 @@
-# HƯỚNG DẪN GÁN NHÃN DỮ LIỆU AI — SWIFTLETCARE
+# AI Annotation Guideline — SwiftletCare
 
-**Nhiệm vụ:** TASK-11 | **Phụ trách:** P2 — AI | **Rà soát:** P3
+## 1. Mục tiêu
 
-## 1. Danh sách lớp dự kiến
+Chuẩn hóa nhãn cho object detection và ground truth theo chuỗi thời gian để đánh giá tracking, đếm chim và phát hiện thiên địch. Quy tắc này là bản đề xuất; cần nhóm xác nhận trước khi gán nhãn hàng loạt.
 
-| Mã lớp dự kiến | Tên lớp | Quy tắc gán nhãn |
+## 2. Danh sách class đề xuất
+
+| Class ID | Tên class | Định nghĩa / lưu ý |
 |---:|---|---|
-| 0 | `swiftlet` — chim yến | Gán nhãn từng con chim yến khi hình ảnh đủ rõ để nhận diện đáng tin cậy. |
-| 1 | `snake` — rắn | Gán nhãn rắn nhìn thấy trong vùng camera được thống nhất. |
-| 2 | `rat` — chuột | Gán nhãn chuột nhìn thấy trong vùng camera được thống nhất. |
-| 3 | `owl` — cú | Gán nhãn cú nhìn thấy trong vùng camera được thống nhất. |
+| 0 | `swiftlet` | Chim yến được nhận diện đủ rõ trong ảnh/video. Không tự gán cho chim không xác định được loài. |
+| 1 | `snake` | Rắn nhìn thấy trong vùng camera. |
+| 2 | `rat` | Chuột nhìn thấy trong vùng camera. |
+| 3 | `owl` | Cú nhìn thấy trong vùng camera. |
 
-Mã lớp trên là đề xuất ban đầu, cần được nhóm xác nhận và phải thống nhất với tệp `data.yaml`. Không tự thêm lớp `unknown` nếu chưa có định nghĩa và quy tắc gán nhãn riêng.
+ID chỉ là đề xuất cho version dataset này. Nếu dữ liệu chỉ xác định được `bird` mà không chắc là chim yến, không tự chuyển `bird` thành `swiftlet`. Giữ dataset nguồn riêng hoặc xác định mapping được phê duyệt. Không thêm class `unknown` vào model nếu chưa thống nhất mục tiêu và cách đánh giá.
 
-## 2. Quy tắc vẽ khung bao (bounding box)
+## 3. Bounding box
 
-- Vẽ một khung bao sát đối tượng cho mỗi đối tượng mục tiêu có thể nhận diện.
-- Nếu ảnh có nhiều chim, gán một khung riêng cho từng con khi có thể phân biệt.
-- Với đối tượng bị che khuất một phần, chỉ gán nhãn khi vẫn có đủ căn cứ nhận diện và ước lượng vị trí; áp dụng cùng một quy tắc cho toàn bộ dữ liệu.
-- Với đối tượng quá nhỏ, nhòe hoặc không chắc chắn, không đoán nhãn. Đánh dấu để rà soát hoặc loại khỏi tập gán nhãn theo quy tắc đã thống nhất.
-- Đối tượng ngoài vùng quan tâm của camera phải được xử lý nhất quán: loại khỏi gán nhãn hoặc áp dụng quy tắc riêng đã ghi rõ.
-- Giữ lại ảnh không có đối tượng mục tiêu làm mẫu âm tính; dùng đúng cách biểu diễn nhãn rỗng theo công cụ đã chọn.
-- Không gán loài chim khác thành `swiftlet` nếu không đủ căn cứ xác định đó là chim yến.
+- Mỗi đối tượng mục tiêu nhìn thấy được gán một box riêng.
+- Box bao sát phần đối tượng nhìn thấy; không bao gồm vùng nền quá mức.
+- Đối tượng bị che khuất một phần: gán box nếu vẫn nhận diện được class và có thể xác định vị trí đáng tin cậy; ghi `occluded=true` trong metadata/annotation phụ.
+- Đối tượng quá nhỏ hoặc mờ đến mức không thể xác định class: không đoán nhãn. Đánh dấu `ignore` trong bảng QA/metadata nếu công cụ cho phép; ghi lý do.
+- Đối tượng nằm ngoài vùng quan tâm (ROI) của cửa đếm: vẫn có thể gán nhãn cho bài toán detection nếu thuộc frame và class mục tiêu; `in_roi=false`. Chỉ dùng đối tượng trong ROI để tính Entry/Exit.
+- Ảnh không có đối tượng mục tiêu là negative sample hợp lệ: giữ ảnh và file nhãn rỗng.
+- Không tạo box cho bóng, hình phản chiếu, vật thể giả dạng chim hoặc vật thể không có bằng chứng rõ ràng.
+- Không gộp nhiều con chim vào một box; mỗi con là một instance riêng nếu phân biệt được.
+- Không tự gán class `swiftlet` cho các chấm chuyển động ở xa nếu bằng chứng hình ảnh không đủ.
 
-## 3. Gán nhãn video và theo dõi đối tượng
+## 4. Quy tắc cho video và tracking
 
-Để đánh giá Entry/Exit, chỉ có khung bao phát hiện đối tượng là chưa đủ. Cần giữ video gốc, thứ tự khung hình, dấu thời gian và mã camera. Với tập dùng đánh giá, cần kiểm tra mã theo dõi của từng đối tượng qua các khung hình và gán nhãn thủ công cho sự kiện vượt đường đếm.
+Với mỗi video được dùng đánh giá Entry/Exit, gán nhãn theo frame được chọn và giữ timestamp/frame index:
+- `video_id`, `frame_index`, `timestamp_ms`, `camera_id`, `zone_id`.
+- `object_id`/`track_id` ground truth nhất quán cho cùng cá thể trong đoạn có thể theo dõi.
+- `class_name`, bounding box, `occluded`, `ignore`, `in_roi`.
+- Định nghĩa đường đếm bằng hai điểm `P1(x1,y1)` và `P2(x2,y2)` trên hệ tọa độ frame đã chuẩn hóa; lưu rõ phía `INSIDE` và `OUTSIDE`.
+- Gán `crossing_event` khi tâm box đi qua đường đếm và hướng chuyển động có đủ bằng chứng: `ENTRY` (OUTSIDE → INSIDE), `EXIT` (INSIDE → OUTSIDE).
+- Một lượt qua đường chỉ tạo một ground-truth event. Không tạo event mới chỉ vì track bị mất rồi xuất hiện lại nếu bằng chứng cho thấy cùng lượt/cá thể.
+- Nếu hướng không xác định, nhiều chim chồng lấp hoặc video bị gián đoạn khiến không thể kết luận, đánh dấu `ambiguous` và loại khỏi phép tính chính; báo cáo số lượng trường hợp loại trừ.
+- Track ID ground truth chỉ duy nhất trong phạm vi clip/session, không coi là ID chim vĩnh viễn.
 
-Mỗi sự kiện cần ghi:
-- `event_id`, `camera_id`, `zone_id`, `track_id` (chỉ có ý nghĩa trong phiên theo dõi),
-- hướng: `ENTRY` (`OUTSIDE_TO_INSIDE`) hoặc `EXIT` (`INSIDE_TO_OUTSIDE`),
-- thời gian/số thứ tự khung hình và trạng thái rà soát nhãn.
+## 5. Gán nhãn bất đồng và kiểm tra chất lượng
 
-Mã `track_id` không phải mã định danh vĩnh viễn của một con chim. Nếu chim quay đầu trước khi vượt qua đường đếm thì không tạo sự kiện. Nếu mất dấu hoặc không xác định chắc chắn đối tượng/hướng di chuyển, đánh dấu đoạn không rõ ràng và loại khỏi phép tính độ chính xác sự kiện theo quy tắc đã thống nhất.
+1. Người gán nhãn A tạo nhãn; người B rà soát toàn bộ test và tối thiểu 10% train/val.
+2. Mọi bất đồng class, box hoặc hướng Entry/Exit được giải quyết bởi người rà soát; lưu phiên bản sau sửa.
+3. Dùng kiểm tra tự động: box nằm trong ảnh, width/height dương, class hợp lệ, frame index tăng đúng, track ID nhất quán.
+4. Ghi `annotator`, `reviewer`, `annotation_version`, `review_status`.
+5. Đóng băng test labels trước khi chạy đánh giá cuối; không sửa test theo dự đoán của mô hình.
 
-## 4. Kiểm tra chất lượng nhãn
+## 6. Quy tắc chất lượng tối thiểu
 
-1. Người gán nhãn sử dụng danh sách lớp và định dạng đã thống nhất.
-2. Người thứ hai kiểm tra một phần dữ liệu, ưu tiên chim nhỏ, đối tượng bị che khuất, động vật săn mồi và các khung hình gần thời điểm vượt đường đếm.
-3. Giải quyết bất đồng và lưu quyết định cuối cùng.
-4. Kiểm tra lại nhãn khi thay đổi danh sách lớp hoặc quy tắc.
-5. Ghi phiên bản nhãn, người gán nhãn, người rà soát và ngày rà soát.
-
-## 5. Các quy tắc cần chốt trước khi gán nhãn hàng loạt
-
-- Mức độ rõ/kích thước tối thiểu để gán nhãn chim yến.
-- Cách xử lý che khuất một phần và đối tượng ở sát mép khung hình.
-- Ranh giới vùng quan tâm cho từng camera.
-- Cách xử lý đối tượng không chắc chắn: bỏ qua, đánh dấu rà soát hay dùng nhãn loại trừ riêng.
-- Tỷ lệ kiểm tra chéo và tiêu chí chấp nhận chất lượng nhãn.
+- Không có box ngoài khung ảnh hoặc kích thước bằng 0.
+- Mọi ảnh có file nhãn tương ứng; ảnh negative có file nhãn rỗng.
+- Tên class và ID phải khớp `data.yaml`.
+- Video Entry/Exit phải có đường đếm/ROI và hướng INSIDE/OUTSIDE được xác định.
+- Test set cần có trường hợp khó: chim nhỏ, bay nhanh, che khuất, ánh sáng yếu, đông chim và cảnh không có chim; thiên địch hiếm phải được báo cáo riêng.
