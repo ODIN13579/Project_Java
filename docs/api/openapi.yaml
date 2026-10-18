@@ -1,1 +1,3394 @@
- 
+openapi: 3.0.3
+info:
+  title: SwiftletCare REST API — DSN-09
+  version: 0.9.0-review
+  description: Draft specification for SwiftletCare Java Spring Boot BUILD. REST responses use camelCase; MQTT uses event_id.
+    This contract separates confirmed architecture choices from proposed API route/design decisions.
+    Heartbeat/Telemetry from ESP32 are MQTT, not public REST endpoints.
+servers:
+- url: http://localhost:8080
+  description: Local Spring Boot BUILD demo; production host TBD
+tags:
+- name: Authentication
+- name: Users
+- name: Houses
+- name: Memberships
+- name: Zones
+- name: Devices
+- name: Actuators
+- name: Telemetry
+- name: Zone Configuration
+- name: Control Commands
+- name: AI Events
+- name: Alerts
+- name: Notifications
+- name: Harvest
+- name: Statistics & Reports
+- name: Dashboard
+paths:
+  /api/v1/auth/login:
+    post:
+      tags:
+      - Authentication
+      operationId: login
+      summary: Đăng nhập
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security: []
+      x-build-priority: MVP
+      x-requirement-group: FR-USER/RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/auth/refresh:
+    post:
+      tags:
+      - Authentication
+      operationId: refreshToken
+      summary: Làm mới JWT
+      description: Refresh token policy appears in DSN-05; endpoint should be reviewed with P4 before implementation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPairResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+      security: []
+      x-build-priority: Extended
+      x-requirement-group: FR-USER/RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/auth/logout:
+    post:
+      tags:
+      - Authentication
+      operationId: logout
+      summary: Thu hồi refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        '204':
+          description: No content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-USER/RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/users/me:
+    get:
+      tags:
+      - Users
+      operationId: getMyProfile
+      summary: Xem hồ sơ cá nhân
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-USER
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    patch:
+      tags:
+      - Users
+      operationId: updateMyProfile
+      summary: Cập nhật hồ sơ cá nhân
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-USER
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/houses:
+    get:
+      tags:
+      - Houses
+      operationId: listMyHouses
+      summary: Nhà yến được phép truy cập
+      parameters:
+      - &id001
+        name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          default: 0
+        description: 0-based; default 0
+      - &id002
+        name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 100
+          default: 20
+        description: default 20, maximum 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-FARM/RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    post:
+      tags:
+      - Houses
+      operationId: createHouse
+      summary: Tạo nhà yến và Zone đầu tiên
+      description: Proposed initialZone atomic creation to satisfy House 1..* Zone on Class Diagram; pending approval.
+        Restrict by global role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-FARM/ZONE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/houses/{houseId}:
+    get:
+      tags:
+      - Houses
+      operationId: getHouse
+      summary: Chi tiết nhà yến
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-FARM
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    patch:
+      tags:
+      - Houses
+      operationId: updateHouse
+      summary: Sửa nhà yến
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseUpdateRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-FARM
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/houses/{houseId}/members:
+    get:
+      tags:
+      - Memberships
+      operationId: listHouseMembers
+      summary: Danh sách thành viên nhà yến
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    post:
+      tags:
+      - Memberships
+      operationId: addHouseMember
+      summary: Thêm thành viên nhà yến
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseMembershipResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/houses/{houseId}/members/{membershipId}:
+    patch:
+      tags:
+      - Memberships
+      operationId: updateHouseMember
+      summary: Cập nhật quyền thành viên
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - name: membershipId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipUpdateRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseMembershipResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-RBAC
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/houses/{houseId}/zones:
+    get:
+      tags:
+      - Zones
+      operationId: listHouseZones
+      summary: Liệt kê khu vực trong nhà yến
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ZONE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    post:
+      tags:
+      - Zones
+      operationId: createZone
+      summary: Tạo khu vực
+      parameters:
+      - name: houseId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZoneCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ZONE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/zones/{zoneId}:
+    get:
+      tags:
+      - Zones
+      operationId: getZone
+      summary: Xem chi tiết khu vực
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ZONE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    patch:
+      tags:
+      - Zones
+      operationId: updateZone
+      summary: Cập nhật khu vực
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZoneUpdateRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-ZONE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/zones/{zoneId}/devices:
+    get:
+      tags:
+      - Devices
+      operationId: listZoneDevices
+      summary: Thiết bị theo khu vực
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-DEVICE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    post:
+      tags:
+      - Devices
+      operationId: registerDevice
+      summary: Đăng ký thiết bị cho Zone
+      description: Device is fixed to one zone in v1; no move endpoint. Device credentials provisioned separately (TBD).
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-DEVICE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/devices/{deviceId}:
+    get:
+      tags:
+      - Devices
+      operationId: getDevice
+      summary: Chi tiết, Online/Offline của thiết bị
+      description: deviceId path is internal numeric devices.id, not string devices.device_id in MQTT.
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-DEVICE/IOT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+    patch:
+      tags:
+      - Devices
+      operationId: updateDevice
+      summary: Đổi tên/bật trạng thái quản lý
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceUpdateRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-DEVICE
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/devices/{deviceId}/actuators:
+    get:
+      tags:
+      - Actuators
+      operationId: listDeviceActuators
+      summary: Các actuator của ESP32
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActuatorListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-IOT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/devices/{deviceId}/telemetry/latest:
+    get:
+      tags:
+      - Telemetry
+      operationId: getLatestTelemetry
+      summary: Mẫu đo mới nhất của thiết bị
+      description: Latest by measurement timestamp DESC then receivedAt DESC, not most recently replayed buffer arrival.
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+              example:
+                id: 105
+                deviceId: 12
+                eventId: ESP32-01-000105
+                timestamp: '2026-10-18T08:30:00Z'
+                receivedAt: '2026-10-18T08:30:01Z'
+                temperature: 29.5
+                humidity: 78.2
+                co2: null
+                light: 12.5
+                sensorStatus: PARTIAL_ERROR
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-IOT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/devices/{deviceId}/telemetry:
+    get:
+      tags:
+      - Telemetry
+      operationId: listTelemetry
+      summary: Lịch sử cảm biến theo thời gian
+      description: from inclusive, to exclusive, UTC; period must satisfy from < to; indexed by deviceId/time.
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - &id003
+        name: from
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: UTC inclusive
+      - &id004
+        name: to
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date-time
+        description: UTC exclusive
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-IOT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/zones/{zoneId}/config:
+    get:
+      tags:
+      - Zone Configuration
+      operationId: getZoneConfig
+      summary: Xem ngưỡng cấu hình
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-CONFIG
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    put:
+      tags:
+      - Zone Configuration
+      operationId: upsertZoneConfig
+      summary: Cập nhật cấu hình theo version
+      description: Save/commit is not proof ESP32 applied configuration. Uses version check; MQTT config payload/proof-of-application
+        pending P1/P4.
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ZoneConfigUpsertRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ZoneConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-CONFIG
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/actuators/{actuatorId}/commands:
+    post:
+      tags:
+      - Control Commands
+      operationId: createControlCommand
+      summary: Yêu cầu SET_MODE hoặc SET_STATE
+      description: 'Async: 202 means Backend accepted and persisted command; not evidence actuator changed. SET_STATE
+        requires MANUAL and safety validation; expires 15s, ACK wait 10s per DSN-05 baseline.'
+      parameters:
+      - name: actuatorId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ControlCommandCreateRequest'
+            examples:
+              setMode:
+                summary: Switch to manual
+                value:
+                  action: SET_MODE
+                  targetMode: MANUAL
+              setState:
+                summary: Turn on actuator (manual mode)
+                value:
+                  action: SET_STATE
+                  targetState: true
+      responses:
+        '202':
+          description: Accepted for asynchronous processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlCommandResponse'
+              example:
+                id: 501
+                commandId: CMD-000501
+                actuatorId: 25
+                requestedBy: 1
+                action: SET_STATE
+                targetState: true
+                targetMode: null
+                status: PENDING
+                requestedAt: '2026-10-18T08:35:00Z'
+                sentAt: null
+                ackAt: null
+                expiresAt: '2026-10-18T08:35:15Z'
+                failureReason: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-IOT/CONTROL
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+    get:
+      tags:
+      - Control Commands
+      operationId: listControlCommands
+      summary: Lịch sử điều khiển actuator
+      parameters:
+      - name: actuatorId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlCommandListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-IOT/CONTROL
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/commands/{commandId}:
+    get:
+      tags:
+      - Control Commands
+      operationId: getControlCommand
+      summary: Tra cứu trạng thái lệnh theo commandId
+      parameters:
+      - name: commandId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlCommandResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-IOT/CONTROL
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/internal/ai/count-logs:
+    post:
+      tags:
+      - AI Events
+      operationId: ingestCountLog
+      summary: AI Service ghi kết quả đếm tổng hợp
+      description: P2/P4 must agree how to deduplicate retries; source event id absent from current ERD.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountLogIngestRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - aiServiceKey: []
+      x-build-priority: MVP
+      x-requirement-group: FR-AI
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/internal/ai/anomalies:
+    post:
+      tags:
+      - AI Events
+      operationId: ingestAnomalyEvent
+      summary: AI Service ghi sự kiện bất thường
+      description: Service credential needed; source event id/idempotency pending P2/P4/P5.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnomalyEventIngestRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - aiServiceKey: []
+      x-build-priority: MVP
+      x-requirement-group: FR-AI
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/devices/{deviceId}/count-logs:
+    get:
+      tags:
+      - AI Events
+      operationId: listCountLogs
+      summary: Thống kê đếm từ Camera
+      parameters:
+      - name: deviceId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id003
+      - *id004
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountLogListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-AI
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/zones/{zoneId}/anomalies:
+    get:
+      tags:
+      - AI Events
+      operationId: listZoneAnomalies
+      summary: Sự kiện AI theo khu vực
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id003
+      - *id004
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-AI
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/anomalies/{anomalyId}:
+    get:
+      tags:
+      - AI Events
+      operationId: getAnomaly
+      summary: Chi tiết phát hiện AI
+      parameters:
+      - name: anomalyId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-AI
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/alerts:
+    get:
+      tags:
+      - Alerts
+      operationId: listAlerts
+      summary: Danh sách cảnh báo theo phạm vi
+      description: House authorization is mandatory; alerts in current ERD are scoped via zoneId.
+      parameters:
+      - name: houseId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: zoneId
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - NEW
+          - IN_PROGRESS
+          - RESOLVED
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ALT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/alerts/{alertId}:
+    get:
+      tags:
+      - Alerts
+      operationId: getAlert
+      summary: Chi tiết cảnh báo
+      parameters:
+      - name: alertId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ALT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/alerts/{alertId}/status:
+    patch:
+      tags:
+      - Alerts
+      operationId: changeAlertStatus
+      summary: Tiếp nhận/xử lý cảnh báo
+      description: Update Alert and insert AlertHistory within one database transaction; changedBy is JWT user, system
+        automated actions nullable.
+      parameters:
+      - name: alertId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertStatusUpdateRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ALT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/alerts/{alertId}/history:
+    get:
+      tags:
+      - Alerts
+      operationId: getAlertHistory
+      summary: Lịch sử thay đổi cảnh báo
+      parameters:
+      - name: alertId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertHistoryListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-ALT
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/notifications:
+    get:
+      tags:
+      - Notifications
+      operationId: listMyNotifications
+      summary: Lịch sử gửi thông báo của tôi
+      description: DeliveryStatus is not a read/unread status; do not introduce read flags without FR change.
+      parameters:
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-NOTI
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/zones/{zoneId}/harvest-logs:
+    get:
+      tags:
+      - Harvest
+      operationId: listHarvestLogs
+      summary: Xem nhật ký thu hoạch theo Zone
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      - *id003
+      - *id004
+      - *id001
+      - *id002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarvestLogListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+    post:
+      tags:
+      - Harvest
+      operationId: createHarvestLog
+      summary: Ghi sản lượng thu hoạch
+      parameters:
+      - name: zoneId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HarvestLogCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HarvestLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/reports/environment:
+    get:
+      tags:
+      - Statistics & Reports
+      operationId: getEnvironmentStats
+      summary: Báo cáo thống kê môi trường
+      parameters:
+      - &id005
+        name: zoneId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - *id003
+      - *id004
+      - name: granularity
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - HOURLY
+          - DAILY
+          default: DAILY
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentStatsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/reports/bird-count:
+    get:
+      tags:
+      - Statistics & Reports
+      operationId: getBirdCountStats
+      summary: Báo cáo IN/OUT theo Zone
+      parameters:
+      - *id005
+      - *id003
+      - *id004
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BirdCountStatsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/reports/productivity-correlation:
+    get:
+      tags:
+      - Statistics & Reports
+      operationId: getProductivityCorrelation
+      summary: Tương quan môi trường và thu hoạch
+      description: Exploratory correlation (not causality); matching time windows and minimum sample sizes pending design
+        decision.
+      parameters:
+      - *id005
+      - *id003
+      - *id004
+      - name: metric
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - TEMPERATURE
+          - HUMIDITY
+          - CO2
+          - LIGHT
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-REP/CORRELATION
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/reports:
+    post:
+      tags:
+      - Statistics & Reports
+      operationId: createReport
+      summary: Tạo báo cáo thành file
+      description: Proposed synchronous result if file generated in request; async job requires extra status entity/design.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportCreateRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/reports/{reportId}:
+    get:
+      tags:
+      - Statistics & Reports
+      operationId: getReportMetadata
+      summary: Metadata báo cáo đã tạo
+      parameters:
+      - name: reportId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+  /api/v1/reports/{reportId}/download:
+    get:
+      tags:
+      - Statistics & Reports
+      operationId: downloadReport
+      summary: Tải file báo cáo
+      description: Files accessible only after authorization; handle missing file and storage failure. Binary response.
+      parameters:
+      - name: reportId
+        in: path
+        required: true
+        description: Resource identifier
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: Generated report file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: Extended
+      x-requirement-group: FR-REP
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+  /api/v1/dashboard/summary:
+    get:
+      tags:
+      - Dashboard
+      operationId: getDashboardSummary
+      summary: Số liệu tổng quan nhà yến
+      parameters:
+      - name: houseId
+        in: query
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummaryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+      security:
+      - bearerAuth: []
+      x-build-priority: MVP
+      x-requirement-group: FR-UI/DASHBOARD
+      x-api-spec-status: PROPOSED_NEEDS_REVIEW
+      description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
+        DSN-09.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    aiServiceKey:
+      type: apiKey
+      in: header
+      name: X-Service-Key
+      description: Proposed internal AI service credential; P2/P4 must approve auth mechanism.
+  schemas:
+    RoleName:
+      type: string
+      enum:
+      - OWNER
+      - ADMIN
+    HouseRole:
+      type: string
+      enum:
+      - OWNER
+      - ADMIN
+      - VIEWER
+    DeviceType:
+      type: string
+      enum:
+      - ESP32
+      - CAMERA
+    ActuatorKind:
+      type: string
+      enum:
+      - MIST
+      - FAN
+      - HEATER
+      - AMPLIFIER
+    ControlMode:
+      type: string
+      enum:
+      - AUTO
+      - MANUAL
+    CommandAction:
+      type: string
+      enum:
+      - SET_MODE
+      - SET_STATE
+    CommandStatus:
+      type: string
+      enum:
+      - PENDING
+      - SENT
+      - ACKNOWLEDGED
+      - FAILED
+      - REJECTED
+      - EXPIRED
+    SensorStatus:
+      type: string
+      enum:
+      - OK
+      - PARTIAL_ERROR
+      - ERROR
+    AlertLevel:
+      type: string
+      enum:
+      - WARNING
+      - CRITICAL
+    AlertStatus:
+      type: string
+      enum:
+      - NEW
+      - IN_PROGRESS
+      - RESOLVED
+    NotificationChannel:
+      type: string
+      enum:
+      - WEB
+      - PUSH
+    DeliveryStatus:
+      type: string
+      enum:
+      - PENDING
+      - SENT
+      - DELIVERED
+      - FAILED
+    AggregationType:
+      type: string
+      enum:
+      - HOURLY
+      - DAILY
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+            required:
+            - field
+            - message
+            additionalProperties: false
+      required:
+      - code
+      - message
+      - timestamp
+      description: Error representation, fieldErrors optional.
+      additionalProperties: false
+    PageInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+        totalPages:
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+      - page
+      - size
+      - totalElements
+      - totalPages
+      additionalProperties: false
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        role:
+          $ref: '#/components/schemas/RoleName'
+        active:
+          type: boolean
+      required:
+      - id
+      - email
+      - fullName
+      - role
+      - active
+      additionalProperties: false
+    UserUpdateRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 30
+          nullable: true
+      description: At least one field required by service validation.
+      additionalProperties: false
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - email
+      - password
+      additionalProperties: false
+    TokenPairResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          enum:
+          - Bearer
+        expiresInSec:
+          type: integer
+          format: int32
+          minimum: 1
+      required:
+      - accessToken
+      - tokenType
+      - expiresInSec
+      description: Refresh token policy to be approved by P4.
+      additionalProperties: false
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+      - refreshToken
+      additionalProperties: false
+    LogoutRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+      - refreshToken
+      additionalProperties: false
+    ZoneCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        floorLabel:
+          type: string
+          nullable: true
+        areaM2:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+      required:
+      - name
+      additionalProperties: false
+    HouseCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        address:
+          type: string
+        description:
+          type: string
+          nullable: true
+        initialZone:
+          $ref: '#/components/schemas/ZoneCreateRequest'
+      required:
+      - name
+      - address
+      - initialZone
+      description: Proposed atomic House + first Zone creation to satisfy UML House 1..* Zone; pending P3/P4 approval.
+      additionalProperties: false
+    HouseUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        address:
+          type: string
+        description:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+      additionalProperties: false
+    HouseResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        address:
+          type: string
+        description:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+      required:
+      - id
+      - name
+      - active
+      additionalProperties: false
+    ZoneResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        houseId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        floorLabel:
+          type: string
+          nullable: true
+        areaM2:
+          type: number
+          format: double
+          nullable: true
+        active:
+          type: boolean
+      required:
+      - id
+      - houseId
+      - name
+      - active
+      additionalProperties: false
+    ZoneUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        floorLabel:
+          type: string
+          nullable: true
+        areaM2:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+        active:
+          type: boolean
+      additionalProperties: false
+    HouseMembershipResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        houseId:
+          type: integer
+          format: int64
+        role:
+          $ref: '#/components/schemas/HouseRole'
+        active:
+          type: boolean
+        joinedAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - userId
+      - houseId
+      - role
+      - active
+      - joinedAt
+      additionalProperties: false
+    MembershipCreateRequest:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        role:
+          $ref: '#/components/schemas/HouseRole'
+      required:
+      - userId
+      - role
+      additionalProperties: false
+    MembershipUpdateRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/HouseRole'
+        active:
+          type: boolean
+      additionalProperties: false
+    DeviceResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        deviceId:
+          type: string
+        zoneId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/DeviceType'
+        enabled:
+          type: boolean
+        online:
+          type: boolean
+        lastSeenAt:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+      - id
+      - deviceId
+      - zoneId
+      - name
+      - type
+      - enabled
+      - online
+      additionalProperties: false
+    DeviceCreateRequest:
+      type: object
+      properties:
+        deviceId:
+          type: string
+          maxLength: 100
+        name:
+          type: string
+          maxLength: 150
+        type:
+          $ref: '#/components/schemas/DeviceType'
+        enabled:
+          type: boolean
+      required:
+      - deviceId
+      - name
+      - type
+      additionalProperties: false
+    DeviceUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        enabled:
+          type: boolean
+      description: No device reassignment between zones in v1.
+      additionalProperties: false
+    ActuatorResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        deviceId:
+          type: integer
+          format: int64
+        kind:
+          $ref: '#/components/schemas/ActuatorKind'
+        mode:
+          $ref: '#/components/schemas/ControlMode'
+        'on':
+          type: boolean
+        manualUntil:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+      - id
+      - deviceId
+      - kind
+      - mode
+      - 'on'
+      additionalProperties: false
+    TelemetryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        deviceId:
+          type: integer
+          format: int64
+        eventId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        receivedAt:
+          type: string
+          format: date-time
+        temperature:
+          type: number
+          format: double
+          nullable: true
+        humidity:
+          type: number
+          format: double
+          nullable: true
+        co2:
+          type: number
+          format: double
+          nullable: true
+        light:
+          type: number
+          format: double
+          nullable: true
+        sensorStatus:
+          $ref: '#/components/schemas/SensorStatus'
+      required:
+      - id
+      - deviceId
+      - eventId
+      - timestamp
+      - receivedAt
+      - sensorStatus
+      description: REST camelCase eventId maps MQTT event_id and DB event_id. Null measurements are invalid sensor readings,
+        not zero.
+      additionalProperties: false
+    ZoneConfigUpsertRequest:
+      type: object
+      properties:
+        humidityOn:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+          maximum: 100
+        humidityOff:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+          maximum: 100
+        tempMin:
+          type: number
+          format: double
+          nullable: true
+        tempMax:
+          type: number
+          format: double
+          nullable: true
+        tempHysteresis:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+        co2Min:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+        co2Max:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+        lightMin:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+        lightMax:
+          type: number
+          format: double
+          nullable: true
+          minimum: 0
+        telemetryIntervalSec:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 60
+        heartbeatIntervalSec:
+          type: integer
+          format: int32
+          minimum: 1
+          enum:
+          - 2
+          description: BUILD baseline heartbeat interval fixed at 2s to meet 6s timeout; revisiting requires revising
+            backend timeout.
+        version:
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+      - telemetryIntervalSec
+      - heartbeatIntervalSec
+      - version
+      description: Must validate hysteresis and optimistic version; heartbeat 2s is currently agreed baseline. For BUILD
+        heartbeatIntervalSec must equal 2 until timeout policy is revised.
+      additionalProperties: false
+    ZoneConfigResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        zoneId:
+          type: integer
+          format: int64
+        humidityOn:
+          type: number
+          format: double
+          nullable: true
+        humidityOff:
+          type: number
+          format: double
+          nullable: true
+        tempMin:
+          type: number
+          format: double
+          nullable: true
+        tempMax:
+          type: number
+          format: double
+          nullable: true
+        tempHysteresis:
+          type: number
+          format: double
+          nullable: true
+        co2Min:
+          type: number
+          format: double
+          nullable: true
+        co2Max:
+          type: number
+          format: double
+          nullable: true
+        lightMin:
+          type: number
+          format: double
+          nullable: true
+        lightMax:
+          type: number
+          format: double
+          nullable: true
+        telemetryIntervalSec:
+          type: integer
+          format: int32
+          minimum: 1
+        heartbeatIntervalSec:
+          type: integer
+          format: int32
+          minimum: 1
+        version:
+          type: integer
+          format: int32
+          minimum: 0
+        updatedAt:
+          type: string
+          format: date-time
+        syncStatus:
+          type: string
+          enum:
+          - PENDING
+          - APPLIED
+          - UNKNOWN
+      required:
+      - id
+      - zoneId
+      - telemetryIntervalSec
+      - heartbeatIntervalSec
+      - version
+      - updatedAt
+      description: syncStatus is derived transport status, not a property of ZoneConfig Entity; proposal needing P1/P4
+        validation.
+      additionalProperties: false
+    ControlCommandCreateRequest:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/CommandAction'
+        targetState:
+          type: boolean
+        targetMode:
+          $ref: '#/components/schemas/ControlMode'
+      required:
+      - action
+      description: SET_STATE requires targetState only; SET_MODE requires targetMode only. No implicit mode switch.
+      additionalProperties: false
+    ControlCommandResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        commandId:
+          type: string
+        actuatorId:
+          type: integer
+          format: int64
+        requestedBy:
+          type: integer
+          format: int64
+        action:
+          $ref: '#/components/schemas/CommandAction'
+        targetState:
+          type: boolean
+          nullable: true
+        targetMode:
+          type: string
+          enum:
+          - AUTO
+          - MANUAL
+          nullable: true
+        status:
+          $ref: '#/components/schemas/CommandStatus'
+        requestedAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          nullable: true
+          format: date-time
+        ackAt:
+          type: string
+          nullable: true
+          format: date-time
+        expiresAt:
+          type: string
+          nullable: true
+          format: date-time
+        failureReason:
+          type: string
+          nullable: true
+      required:
+      - id
+      - commandId
+      - actuatorId
+      - action
+      - status
+      - requestedAt
+      additionalProperties: false
+    CountLogResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        deviceId:
+          type: integer
+          format: int64
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        entryCount:
+          type: integer
+          format: int32
+          minimum: 0
+        exitCount:
+          type: integer
+          format: int32
+          minimum: 0
+        detectCount:
+          type: integer
+          format: int32
+          minimum: 0
+        aggregationType:
+          $ref: '#/components/schemas/AggregationType'
+        processedAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - deviceId
+      - periodStart
+      - periodEnd
+      - entryCount
+      - exitCount
+      - detectCount
+      - aggregationType
+      - processedAt
+      additionalProperties: false
+    CountLogIngestRequest:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+        periodStart:
+          type: string
+          format: date-time
+        periodEnd:
+          type: string
+          format: date-time
+        entryCount:
+          type: integer
+          format: int32
+          minimum: 0
+        exitCount:
+          type: integer
+          format: int32
+          minimum: 0
+        detectCount:
+          type: integer
+          format: int32
+          minimum: 0
+        aggregationType:
+          $ref: '#/components/schemas/AggregationType'
+        processedAt:
+          type: string
+          format: date-time
+      required:
+      - deviceId
+      - periodStart
+      - periodEnd
+      - entryCount
+      - exitCount
+      - detectCount
+      - aggregationType
+      - processedAt
+      description: Idempotency key for repeated AI submissions is not defined in the current Entity/ERD; pending P2/P4/P5.
+      additionalProperties: false
+    AnomalyEventResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        deviceId:
+          type: integer
+          format: int64
+        species:
+          type: string
+        confidence:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        detectedAt:
+          type: string
+          format: date-time
+        snapshotPath:
+          type: string
+          nullable: true
+      required:
+      - id
+      - deviceId
+      - species
+      - confidence
+      - detectedAt
+      additionalProperties: false
+    AnomalyEventIngestRequest:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+        species:
+          type: string
+        confidence:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+        detectedAt:
+          type: string
+          format: date-time
+        snapshotPath:
+          type: string
+          nullable: true
+      required:
+      - deviceId
+      - species
+      - confidence
+      - detectedAt
+      description: Idempotency not yet defined in ERD; service-to-service authorization required.
+      additionalProperties: false
+    AlertResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        zoneId:
+          type: integer
+          format: int64
+        anomalyEventId:
+          type: integer
+          format: int64
+        type:
+          type: string
+        level:
+          $ref: '#/components/schemas/AlertLevel'
+        status:
+          $ref: '#/components/schemas/AlertStatus'
+        message:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        handledAt:
+          type: string
+          nullable: true
+          format: date-time
+      required:
+      - id
+      - zoneId
+      - type
+      - level
+      - status
+      - message
+      - createdAt
+      additionalProperties: false
+    AlertStatusUpdateRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/AlertStatus'
+        note:
+          type: string
+          nullable: true
+      required:
+      - status
+      additionalProperties: false
+    AlertHistoryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        alertId:
+          type: integer
+          format: int64
+        changedBy:
+          type: integer
+          format: int64
+          nullable: true
+        fromStatus:
+          type: string
+          enum:
+          - NEW
+          - IN_PROGRESS
+          - RESOLVED
+          nullable: true
+        toStatus:
+          $ref: '#/components/schemas/AlertStatus'
+        changeAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          nullable: true
+      required:
+      - id
+      - alertId
+      - toStatus
+      - changeAt
+      additionalProperties: false
+    NotificationDeliveryResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        alertId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        channel:
+          $ref: '#/components/schemas/NotificationChannel'
+        status:
+          $ref: '#/components/schemas/DeliveryStatus'
+        createdAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          nullable: true
+          format: date-time
+        deliveredAt:
+          type: string
+          nullable: true
+          format: date-time
+        failureReason:
+          type: string
+          nullable: true
+      required:
+      - id
+      - alertId
+      - userId
+      - channel
+      - status
+      - createdAt
+      additionalProperties: false
+    HarvestLogResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        zoneId:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date
+        yieldKg:
+          type: number
+          format: double
+          minimum: 0
+        note:
+          type: string
+          nullable: true
+      required:
+      - id
+      - zoneId
+      - date
+      - yieldKg
+      additionalProperties: false
+    HarvestLogCreateRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        yieldKg:
+          type: number
+          format: double
+          minimum: 0
+        note:
+          type: string
+          nullable: true
+      required:
+      - date
+      - yieldKg
+      additionalProperties: false
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        type:
+          type: string
+        createdBy:
+          type: integer
+          format: int64
+        rangeFrom:
+          type: string
+          format: date-time
+        rangeTo:
+          type: string
+          format: date-time
+        filePath:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - type
+      - rangeFrom
+      - rangeTo
+      - createdAt
+      additionalProperties: false
+    ReportCreateRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        rangeFrom:
+          type: string
+          format: date-time
+        rangeTo:
+          type: string
+          format: date-time
+        zoneId:
+          type: integer
+          format: int64
+      required:
+      - type
+      - rangeFrom
+      - rangeTo
+      description: zoneId is a filter for generation, not a Report Entity column in current ERD; optional proposal.
+      additionalProperties: false
+    EnvironmentStatPoint:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        avgTemperature:
+          type: number
+          format: double
+          nullable: true
+        avgHumidity:
+          type: number
+          format: double
+          nullable: true
+        avgCo2:
+          type: number
+          format: double
+          nullable: true
+        avgLight:
+          type: number
+          format: double
+          nullable: true
+        sampleCount:
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+      - timestamp
+      - sampleCount
+      additionalProperties: false
+    EnvironmentStatsResponse:
+      type: object
+      properties:
+        zoneId:
+          type: integer
+          format: int64
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        granularity:
+          type: string
+          enum:
+          - HOURLY
+          - DAILY
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnvironmentStatPoint'
+      required:
+      - zoneId
+      - from
+      - to
+      - granularity
+      - points
+      additionalProperties: false
+    BirdCountStatsResponse:
+      type: object
+      properties:
+        zoneId:
+          type: integer
+          format: int64
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        entryCount:
+          type: integer
+          format: int32
+          minimum: 0
+        exitCount:
+          type: integer
+          format: int32
+          minimum: 0
+        detectCount:
+          type: integer
+          format: int32
+          minimum: 0
+      required:
+      - zoneId
+      - from
+      - to
+      - entryCount
+      - exitCount
+      - detectCount
+      additionalProperties: false
+    CorrelationResponse:
+      type: object
+      properties:
+        zoneId:
+          type: integer
+          format: int64
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        metric:
+          type: string
+          enum:
+          - TEMPERATURE
+          - HUMIDITY
+          - CO2
+          - LIGHT
+        samplePairs:
+          type: integer
+          format: int32
+          minimum: 0
+        pearsonR:
+          type: number
+          format: double
+          nullable: true
+          minimum: -1
+          maximum: 1
+        note:
+          type: string
+      required:
+      - zoneId
+      - from
+      - to
+      - metric
+      - samplePairs
+      - pearsonR
+      - note
+      description: Exploratory correlation; does not establish causation. Calculation/matching policy TBD.
+      additionalProperties: false
+    DashboardSummaryResponse:
+      type: object
+      properties:
+        houseId:
+          type: integer
+          format: int64
+        zoneCount:
+          type: integer
+          format: int32
+          minimum: 0
+        deviceCount:
+          type: integer
+          format: int32
+          minimum: 0
+        onlineDeviceCount:
+          type: integer
+          format: int32
+          minimum: 0
+        openAlertCount:
+          type: integer
+          format: int32
+          minimum: 0
+        lastUpdatedAt:
+          type: string
+          format: date-time
+      required:
+      - houseId
+      - zoneCount
+      - deviceCount
+      - onlineDeviceCount
+      - openAlertCount
+      - lastUpdatedAt
+      additionalProperties: false
+    HouseListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HouseResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    ZoneListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ZoneResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    MembershipListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HouseMembershipResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    DeviceListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    ActuatorListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActuatorResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    TelemetryListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TelemetryResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    ControlCommandListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ControlCommandResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    CountLogListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountLogResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    AnomalyListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnomalyEventResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    AlertListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    AlertHistoryListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertHistoryResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    NotificationListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationDeliveryResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+    HarvestLogListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/HarvestLogResponse'
+        page:
+          $ref: '#/components/schemas/PageInfo'
+      required:
+      - items
+      - page
+      additionalProperties: false
+  responses:
+    BadRequest:
+      description: Bad input or malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Unauthorized:
+      description: Authentication required or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Forbidden:
+      description: Insufficient access within resource house
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Conflict:
+      description: Conflict with state/unique/version
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Unprocessable:
+      description: Business validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Unavailable:
+      description: Dependent service unavailable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
