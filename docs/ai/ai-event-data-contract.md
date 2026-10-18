@@ -1,70 +1,147 @@
-# QUY ƯỚC DỮ LIỆU SỰ KIỆN AI GỬI BACKEND — SWIFTLETCARE
+# AI Event Data Contract — SwiftletCare
 
-**Nhiệm vụ:** TASK-11  
-**Phối hợp:** P2 — AI và P4 — Backend  
-**Liên quan:** TASK-04 — Kiến trúc AI; TASK-05 — Backend
+## 1. Mục đích và nguyên tắc
 
-## 1. Quy tắc chung
+Đề xuất hợp đồng dữ liệu giữa AI Service/Edge Node và Backend. Đây là **draft để P2 và P4 thống nhất**, chưa phải API chính thức của TASK-05. Chi tiết endpoint, authentication và transport do Backend chốt riêng.
 
-- Mỗi sự kiện logic có một `eventId` duy nhất. Khi gửi lại do lỗi mạng, giữ nguyên `eventId` để Backend loại bỏ dữ liệu trùng.
-- Thời gian dùng định dạng ISO 8601 và phải có múi giờ. Ví dụ bên dưới dùng UTC, ký hiệu `Z`.
-- `cameraId` và `zoneId` phải trỏ đến camera/khu vực đã được khai báo trong Backend.
-- `confidence` là số trong khoảng 0–1 nếu được cung cấp.
-- `evidenceUrl` là đường dẫn tham chiếu đến ảnh/clip bằng chứng đã lưu, không phải dữ liệu ảnh nhúng trực tiếp. P4 cần thống nhất quyền truy cập, thời hạn lưu và thời điểm hết hạn.
-- `trackId` chỉ có ý nghĩa trong một phiên theo dõi, không phải mã định danh vĩnh viễn của chim.
-- Đây là quy ước đề xuất để rà soát, chưa phải lược đồ API chính thức. P4 cần xác nhận tên trường, giao thức truyền, xác thực, lưu trữ và cơ chế gửi lại.
+Nguyên tắc:
+- Mỗi event có ID ổn định để chống xử lý trùng.
+- Timestamp ISO 8601 có timezone; khuyến nghị UTC (`Z`) khi truyền.
+- `cameraId` và `zoneId` là ID đã đăng ký với Backend.
+- Ảnh evidence dùng URI tham chiếu có kiểm soát quyền truy cập; không nhúng ảnh/video base64 vào event.
+- Track ID chỉ có ý nghĩa trong tracking session.
+- Payload cần có version schema.
 
-## 2. Ví dụ sự kiện phát hiện động vật săn mồi
+## 2. Event type đề xuất
+
+- `PREDATOR_DETECTED`
+- `BIRD_ENTRY`
+- `BIRD_EXIT`
+- Có thể bổ sung `BIRD_COUNT_SNAPSHOT` khi Backend cần thống kê theo cửa sổ; không dùng snapshot thay cho event từng lượt.
+
+## 3. Schema JSON minh họa
 
 ```json
 {
-  "eventId": "example-event-id",
+  "schemaVersion": "1.0",
+  "eventId": "0199-example-unique-id",
   "eventType": "PREDATOR_DETECTED",
-  "className": "snake",
-  "confidence": 0.91,
-  "timestamp": "2026-10-15T10:20:30Z",
+  "timestamp": "2026-10-15T10:20:30.123Z",
+  "producer": {
+    "service": "swiftletcare-ai",
+    "modelVersion": "model-version",
+    "trackingSessionId": "session-20261015-01"
+  },
   "cameraId": "camera-01",
   "zoneId": "zone-01",
-  "evidenceUrl": "example-evidence-reference"
+  "object": {
+    "className": "snake",
+    "confidence": 0.91,
+    "trackId": "track-17",
+    "bbox": {
+      "format": "xyxy",
+      "x1": 120,
+      "y1": 80,
+      "x2": 220,
+      "y2": 190,
+      "imageWidth": 1280,
+      "imageHeight": 720
+    }
+  },
+  "crossing": null,
+  "evidence": {
+    "evidenceId": "evidence-0199-example",
+    "uri": "https://storage.example.invalid/evidence/file.jpg",
+    "mediaType": "image/jpeg",
+    "capturedAt": "2026-10-15T10:20:30.123Z",
+    "sha256": "replace-with-real-sha256"
+  },
+  "deduplicationKey": "camera-01:session-20261015-01:track-17:PREDATOR_DETECTED",
+  "traceId": "trace-example"
 }
 ```
 
-## 3. Ví dụ sự kiện chim bay vào/ra
+URI và ID ở trên chỉ là placeholder, không phải endpoint hay file thật.
+
+## 4. Quy tắc trường
+
+| Trường | Bắt buộc | Quy tắc |
+|---|---|---|
+| `schemaVersion` | Có | Version schema để tương thích ngược |
+| `eventId` | Có | ID duy nhất cho một event; tạo trước khi publish và giữ nguyên khi retry |
+| `eventType` | Có | Enum đã thống nhất |
+| `timestamp` | Có | ISO 8601 có timezone; thống nhất timestamp của crossing/detection |
+| `cameraId`, `zoneId` | Có | ID đã đăng ký; không dùng tên hiển thị tùy ý |
+| `producer.service` | Có | Tên service tạo event |
+| `producer.modelVersion` | Có với AI event | Version checkpoint/model hoặc `unknown` khi chưa có |
+| `producer.trackingSessionId` | Có cho Entry/Exit | Định danh phiên tracking |
+| `object.className`, `confidence` | Có cho object event | Class trong class map; confidence nằm trong [0,1] |
+| `object.trackId` | Có cho Entry/Exit; nếu có cho detection | Chỉ duy nhất trong session, không phải ID chim vĩnh viễn |
+| `object.bbox` | Có nếu có detection box | Hệ tọa độ `xyxy`, pixel trên ảnh gốc; tọa độ và kích thước ảnh phải cùng hệ |
+| `crossing.direction` | Có cho Entry/Exit | `ENTRY` hoặc `EXIT` |
+| `crossing.lineId` | Có cho Entry/Exit | ID đường đếm đã cấu hình |
+| `evidence.uri` | Theo chính sách event | URI nội bộ hoặc URL ký hạn; phải có kiểm soát truy cập/retention |
+| `deduplicationKey` | Khuyến nghị | Giúp chống tạo event nghiệp vụ trùng; quy tắc cụ thể cần P4 chốt |
+| `traceId` | Khuyến nghị | Theo dõi event qua AI và Backend |
+
+## 5. Ví dụ Entry/Exit
 
 ```json
 {
-  "eventId": "bird-event-001",
-  "eventType": "ENTRY",
-  "className": "swiftlet",
-  "trackId": "track-125",
-  "trackingSessionId": "session-20261015-01",
-  "direction": "OUTSIDE_TO_INSIDE",
-  "timestamp": "2026-10-15T10:20:30Z",
+  "schemaVersion": "1.0",
+  "eventId": "0199-entry-example",
+  "eventType": "BIRD_ENTRY",
+  "timestamp": "2026-10-15T10:20:31.500Z",
+  "producer": {
+    "service": "swiftletcare-ai",
+    "modelVersion": "yolo-version+tracker-version",
+    "trackingSessionId": "session-20261015-01"
+  },
   "cameraId": "camera-01",
   "zoneId": "zone-01",
-  "countingLineId": "entrance-line-01",
-  "confidence": 0.88,
-  "evidenceUrl": "example-frame-reference"
+  "object": {
+    "className": "swiftlet",
+    "confidence": 0.88,
+    "trackId": "track-42",
+    "bbox": {
+      "format": "xyxy",
+      "x1": 310,
+      "y1": 160,
+      "x2": 350,
+      "y2": 205,
+      "imageWidth": 1280,
+      "imageHeight": 720
+    }
+  },
+  "crossing": {
+    "direction": "ENTRY",
+    "lineId": "entrance-line-01",
+    "fromSide": "OUTSIDE",
+    "toSide": "INSIDE",
+    "crossingTimestamp": "2026-10-15T10:20:31.500Z"
+  },
+  "evidence": {
+    "evidenceId": "evidence-entry-example",
+    "uri": "https://storage.example.invalid/evidence/entry.jpg",
+    "mediaType": "image/jpeg",
+    "capturedAt": "2026-10-15T10:20:31.500Z"
+  },
+  "deduplicationKey": "camera-01:session-20261015-01:track-42:entrance-line-01:ENTRY"
 }
 ```
 
-Giá trị `eventType` cho sự kiện vượt đường đếm của chim: `ENTRY`, `EXIT`.
-- `ENTRY` tương ứng `OUTSIDE_TO_INSIDE` — từ ngoài vào trong.
-- `EXIT` tương ứng `INSIDE_TO_OUTSIDE` — từ trong ra ngoài.
+## 6. Chống trùng và retry
 
-Giá trị `confidence` trong ví dụ chỉ để minh họa. Nhóm cần xác định rõ đó là độ tin cậy phát hiện, độ tin cậy theo dõi/vượt đường hay độ tin cậy sự kiện đã hiệu chỉnh.
+- Producer tạo `eventId` trước lần gửi đầu tiên; retry cùng event phải dùng lại `eventId`.
+- Backend nên xử lý idempotent theo `eventId`; uniqueness scope và retention do P4 chốt.
+- `deduplicationKey` hỗ trợ phát hiện cùng track qua cùng line/hướng trong một session, nhưng không thay thế `eventId`.
+- Nếu track ID bị reset sau mất kết nối/restart, session mới phải có `trackingSessionId` mới.
+- Không gộp hai lượt chim khác nhau chỉ vì chúng đi qua cùng camera trong thời gian gần nhau.
+- Evidence upload thất bại không được âm thầm làm mất event; chính sách retry/evidence-missing phải được chốt.
 
-## 4. Gửi lại và chống ghi nhận trùng
+## 7. Bảo mật và lưu trữ
 
-Khi gặp lỗi tạm thời, bên gửi có thể gửi lại sự kiện với cùng `eventId`. Backend cần xem các lần nhận cùng `eventId` là một sự kiện logic, không cộng lượt nhiều lần. Không tạo mã sự kiện mới cho mỗi lần gửi lại.
-
-## 5. Các nội dung P2/P4 cần chốt
-
-- Tên trường cuối cùng và trường bắt buộc/tùy chọn.
-- API endpoint hoặc MQTT topic và cấu trúc gói tin.
-- Xác thực, phân quyền và bảo mật truyền dữ liệu.
-- Nguồn thời gian, quy ước UTC và cách hiển thị giờ địa phương.
-- Nơi lưu bằng chứng, quyền truy cập, thời hạn lưu và hết hạn.
-- Cách tạo `eventId` và bên chịu trách nhiệm chống trùng.
-- Cơ chế gửi lại, thời gian chờ và lưu tạm khi mất mạng.
-- Gửi dữ liệu phát hiện/track thô hay chỉ gửi sự kiện tổng hợp.
+- Không gửi API key, mật khẩu hoặc thông tin nhạy cảm trong payload.
+- Evidence URI phải được bảo vệ, thời hạn truy cập và thời gian lưu do P4/chủ trang trại thống nhất.
+- Backend xác thực camera/service và kiểm tra enum, timestamp, confidence, kích thước bbox, schema version.
+- Thay đổi breaking schema phải tăng major version hoặc được thống nhất tương thích.
