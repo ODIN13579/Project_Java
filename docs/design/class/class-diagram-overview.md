@@ -1,16 +1,8 @@
-# SwiftletCare — Class Diagram Overview
-
-> **Task:** DSN-06 — System Domain / Entity Class Diagram  
-> **Trạng thái:** Nhóm đã chốt sơ đồ lớp (baseline)  
-> **Nguồn đối chiếu:** `Class_Diagram.drawio.png` do nhóm cung cấp  
-> **Phạm vi:** Mô tả thiết kế đã thể hiện trên sơ đồ; các chi tiết không nhìn thấy hoặc chưa đặc tả được ghi rõ là *cần xác nhận*, không tự ý coi là quyết định mới.  
-> **Đơn vị phụ trách:** P3 tổng hợp; P1 (IoT), P2 (AI), P4 (Backend/ERD/RBAC), P5 (UI/Notification) cùng đối chiếu.
-
 ## 1. Mục tiêu và cách sử dụng
 
 Tài liệu này giải thích các lớp nghiệp vụ chính, trách nhiệm của từng lớp, kiểu dữ liệu, các quan hệ và các quy tắc cần tuân thủ khi triển khai SwiftletCare. Đây là **Domain/Entity Class Diagram**; không phải sơ đồ triển khai chi tiết các `Controller`, `Service`, `Repository` của Spring Boot, không phải ERD, và không mô tả thuật toán bên trong firmware ESP32 hay YOLO/ByteTrack.
 
-**Nguyên tắc nguồn sự thật:** sơ đồ lớp đã chốt là baseline về phạm vi; `overview.md` diễn giải baseline. Những đề xuất kiểm tra ở mục 8 **không thay đổi quyết định của nhóm** cho đến khi có xác nhận và cập nhật sơ đồ gốc.
+**Nguyên tắc nguồn sự thật:** sơ đồ mới là nguồn cho các thuộc tính *đang hiển thị*. Các quyết định tích hợp P1–P4 đã xác nhận (ví dụ `event_id`, heartbeat) được ghi riêng. Khi sơ đồ còn thiếu thuộc tính hoặc thông tin nullable, tài liệu đánh dấu **CẦN SỬA SƠ ĐỒ**, không giả định là đã sửa xong.
 
 ## 2. Tổng quan các module
 
@@ -38,7 +30,7 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 - **Trách nhiệm:** nối `User` và `House` để biểu diễn thành viên/quyền truy cập nhà yến.
 - **Thuộc tính:** `id: Long`, `role: HouseRole`, `active: boolean`, `joinedAt: Instant`.
 - **Quan hệ:** một bản ghi thuộc **1 User** và **1 House**; mỗi User/House có thể có **0..*** bản ghi Membership.
-- **Quy tắc cần hiện thực:** tránh nhiều membership đang hoạt động trùng cho cùng cặp User–House; chỉ cho phép thao tác trong phạm vi quyền được cấp. Tên `HouseRole` được sử dụng trong thuộc tính nhưng enum này **chưa được vẽ thành ô enum riêng** trong ảnh hiện tại.
+- **Quy tắc cần hiện thực:** tránh nhiều membership đang hoạt động trùng cho cùng cặp User–House; chỉ cho phép thao tác trong phạm vi quyền được cấp. `HouseRole` **đã được vẽ** trong ảnh mới với `OWNER`, `ADMIN`, `VIEWER`; khác phạm vi với `User.role: RoleName`.
 
 #### `House`
 - **Trách nhiệm:** thông tin một nhà yến.
@@ -49,7 +41,7 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 #### `Zone`
 - **Trách nhiệm:** một khu vực (tầng/vùng) thuộc nhà yến; phạm vi để gắn thiết bị, cấu hình và thống kê/cảnh báo.
 - **Thuộc tính:** `id: Long`, `name: String`, `floorLabel: String`, `areaM2: Double`, `active: boolean`.
-- **Quan hệ:** thuộc **1 House**; có quan hệ **1–1** với `ZoneConfig` trên sơ đồ; chứa **0..*** `Device`; được dùng làm phạm vi của cảnh báo và nhật ký sản lượng.
+- **Quan hệ:** thuộc **1 House**; có quan hệ **1–0..1** với ô `ZoneConfig` cạnh Zone trên sơ đồ mới; chứa **0..*** `Device`; được dùng làm phạm vi của cảnh báo và nhật ký sản lượng.
 - **Lưu ý:** sơ đồ hiện tại thể hiện một Device đang thuộc một Zone, không mô tả lịch sử chuyển Zone.
 
 #### `Device`
@@ -63,7 +55,7 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 #### `ZoneConfig`
 - **Trách nhiệm:** cấu hình các ngưỡng môi trường và chu kỳ telemetry/heartbeat cho Zone; hỗ trợ đồng bộ cấu hình với ESP32.
 - **Thuộc tính đọc được từ bản thể hiện đầy đủ:** `id: Long`, `humidityOn: Double`, `humidityOff: Double`, `tempMin: Double`, `tempMax: Double`, `tempHysteresis: Double`, `co2Min: Double`, `co2Max: Double`, `lightMin: Double`, `lightMax: Double`, `telemetryIntervalSec: int`, `heartbeatIntervalSec: int`, `version: int`, `updatedAt: Instant`.
-- **Quan hệ:** `Zone 1` — `ZoneConfig 1` theo sơ đồ.
+- **Quan hệ:** trên liên kết với ô gần Zone, `Zone 1` — `ZoneConfig 0..1`; trong khối IoT vẫn còn một ô `ZoneConfig` lặp và liên kết khác. Cần giữ một lớp thống nhất, một multiplicity chính thức.
 - **Lưu ý:** bản vẽ lặp lại của `ZoneConfig` bên trong vùng IoT có **ít thuộc tính hơn**. Khi thực hiện ERD/code, sử dụng **một định nghĩa thống nhất** được nhóm xác nhận; không tạo hai bảng `ZoneConfig` từ hai ô vẽ.
 
 #### `Sensor`
@@ -82,11 +74,13 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 - **Trách nhiệm:** lưu bản đo môi trường từ thiết bị và trạng thái chất lượng dữ liệu.
 - **Thuộc tính:** `id: Long`, `eventId: String`, `timestamp: Instant`, `receivedAt: Instant`, `temperature: Double`, `humidity: Double`, `co2: Double`, `light: Double`, `sensorStatus: SensorStatus`.
 - **Quan hệ:** `Device 1` — `Telemetry 0..*`.
-- **Quy tắc:** dùng cặp định danh thiết bị và `eventId` để chống lưu trùng khi gửi bù; thời điểm đo (`timestamp`) khác thời điểm Backend nhận (`receivedAt`); giá trị từ cảm biến lỗi không được dùng làm số đo hợp lệ cho AUTO.
+- **Quy tắc:** tên thuộc tính Java `eventId` ánh xạ JSON MQTT `event_id` và SQL `event_id` (quyết định đã chốt); chống trùng qua `UNIQUE(device_id, event_id)` ở DB; retry giữ nguyên `event_id` và thời điểm đo. `timestamp` khác `receivedAt`. Các phép đo lỗi cần cho phép `null` trong DTO/DB; không dùng số 0 giả làm dữ liệu hợp lệ.
 
 #### `ControlCommand`
 - **Trách nhiệm:** theo dõi lệnh điều khiển gửi tới actuator và vòng đời xử lý lệnh.
-- **Thuộc tính:** `id: Long`, `commandId: String`, `targetState: boolean`, `requestedAt: Instant`, `status: CommandStatus`, `sentAt: Instant`, `ackAt: Instant`, `failureReason: String`, `expiresAt: Instant`.
+- **Thuộc tính THỰC SỰ đang vẽ:** `id: Long`, `commandId: String`, `targetState: boolean`, `targetMode: ControlMode`, `requestedAt: Instant`, `status: CommandStatus`, `sentAt: Instant`, `ackAt: Instant`, `failureReason: String`, `expiresAt: Instant`.
+- **Sai lệch còn lại:** dù `CommandAction {SET_MODE, SET_STATE}` đã vẽ trong nhóm Enum, `ControlCommand` **chưa có** `action: CommandAction`. Hai thuộc tính `targetState` và `targetMode` cũng chưa thể hiện nullable.
+- **Cấu trúc đề xuất cần P3 sửa trên sơ đồ để khớp ERD/P1:** `action: CommandAction` (bắt buộc), `targetState: Boolean [0..1]`, `targetMode: ControlMode [0..1]`. Quy tắc XOR: `SET_STATE` chỉ dùng `targetState`, `SET_MODE` chỉ dùng `targetMode`.
 - **Quan hệ:** `Actuator 1` — `ControlCommand 0..*`; sơ đồ còn nối các lệnh với `User` ở phía yêu cầu thao tác.
 - **Quy tắc:** `PENDING`/`SENT` chưa đồng nghĩa thi hành thành công; lệnh quá hạn hoặc bị từ chối không được áp dụng; `commandId` không đổi khi retry.
 
@@ -96,7 +90,7 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 - **Trách nhiệm:** kết quả đếm chim theo khoảng thời gian và loại tổng hợp.
 - **Thuộc tính:** `id: Long`, `periodStart: Instant`, `periodEnd: Instant`, `entryCount: int`, `exitCount: int`, `detectCount: int`, `aggregationType: AggregationType`, `processedAt: Instant`.
 - **Quan hệ:** gắn với `Device` kiểu CAMERA.
-- **Lưu ý:** `entryCount`/`exitCount` là số lượt vào/ra; `detectCount` cần có định nghĩa đo lường do P2 thống nhất. `AggregationType` được dùng nhưng **chưa có ô enum riêng** trong ảnh.
+- **Lưu ý:** `entryCount`/`exitCount` là số lượt vào/ra; `detectCount` cần có định nghĩa đo lường do P2 thống nhất. `AggregationType` đã xuất hiện như một ô enum riêng trong ảnh mới: `HOURLY`, `DAILY`.
 
 #### `AnomalyEvent`
 - **Trách nhiệm:** lưu sự kiện bất thường do AI phát hiện cùng độ tin cậy và ảnh bằng chứng.
@@ -138,24 +132,27 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 - **Quan hệ:** sơ đồ liên kết Report với User.
 - **Quy tắc:** `rangeFrom < rangeTo`; `filePath` là tham chiếu tệp kết quả, không phải dữ liệu báo cáo; P3 cần thống nhất loại báo cáo và phạm vi dữ liệu với FR-REP.
 
-## 4. Các enumeration trên sơ đồ
+## 4. Enumeration trong phiên bản Class Diagram mới
 
-| Enum đã **vẽ** | Giá trị hiển thị | Dùng trong lớp |
+Ảnh mới **đã vẽ đủ 13 enum** sau. Không đánh dấu `HouseRole`, `AggregationType` hay `CommandAction` là thiếu ô khai báo nữa.
+
+| Enum trên sơ đồ | Giá trị | Đang sử dụng ở |
 |---|---|---|
 | `RoleName` | `OWNER`, `ADMIN` | `User.role` |
+| `HouseRole` | `OWNER`, `ADMIN`, `VIEWER` | `HouseMembership.role` |
 | `DeviceType` | `ESP32`, `CAMERA` | `Device.type` |
 | `ActuatorKind` | `MIST`, `FAN`, `HEATER`, `AMPLIFIER` | `Actuator.kind` |
-| `ControlMode` | `AUTO`, `MANUAL` | `Actuator.mode` |
+| `ControlMode` | `AUTO`, `MANUAL` | `Actuator.mode`, `ControlCommand.targetMode` |
+| `CommandAction` | `SET_MODE`, `SET_STATE` | **Chưa được tham chiếu trong thuộc tính ControlCommand** — cần thêm `action` |
 | `CommandStatus` | `PENDING`, `SENT`, `ACKNOWLEDGED`, `FAILED`, `REJECTED`, `EXPIRED` | `ControlCommand.status` |
 | `AlertLevel` | `WARNING`, `CRITICAL` | `Alert.level` |
-| `AlertStatus` | `NEW`, `IN_PROGRESS`, `RESOLVED` | `Alert.status`, `AlertHistory` |
+| `AlertStatus` | `NEW`, `IN_PROGRESS`, `RESOLVED` | `Alert.status`, `AlertHistory.fromStatus/toStatus` |
 | `NotificationChannel` | `WEB`, `PUSH` | `NotificationDelivery.channel` |
 | `DeliveryStatus` | `PENDING`, `SENT`, `DELIVERED`, `FAILED` | `NotificationDelivery.status` |
 | `SensorStatus` | `OK`, `PARTIAL_ERROR`, `ERROR` | `Telemetry.sensorStatus` |
+| `AggregationType` | `HOURLY`, `DAILY` | `CountLog.aggregationType` |
 
-**Hai kiểu Enum được tham chiếu nhưng chưa thấy hộp khai báo trong ảnh:** `HouseRole` (ở `HouseMembership.role`) và `AggregationType` (ở `CountLog.aggregationType`). Bổ sung phần khai báo/tra cứu giá trị nếu nhóm đã thống nhất, không tự đặt giá trị chưa chốt.
-
-`Sensor.kind`, `Alert.type`, `Report.type` và `AnomalyEvent.species` **hiện vẫn là String** trong sơ đồ đã chốt.
+`Sensor.kind`, `Alert.type`, `Report.type`, `AnomalyEvent.species` là `String` trong sơ đồ. **`OFFLINE` không thuộc `ControlMode`**; đây là trạng thái kết nối thiết bị được Backend suy ra từ heartbeat.
 
 ## 5. Quan hệ nghiệp vụ trọng tâm
 
@@ -164,7 +161,7 @@ Sơ đồ thể hiện **17 lớp nghiệp vụ phân biệt**. `ZoneConfig` đ�
 | `User` — `HouseMembership` | User **1** : Membership **0..*** | Một người dùng có thể có nhiều quyền tham gia nhà |
 | `House` — `HouseMembership` | House **1** : Membership **0..*** | Một nhà có nhiều thành viên |
 | `House` — `Zone` | House **1** : Zone **1..***, composition | Một nhà chứa ít nhất một khu vực theo sơ đồ |
-| `Zone` — `ZoneConfig` | **1 : 1** | Mỗi Zone có một cấu hình được thể hiện |
+| `Zone` — `ZoneConfig` | **Zone 1 : Config 0..1** ở ô gần Zone | Mỗi Zone có tối đa một cấu hình hiện hành; ô trùng trong vùng IoT cần gỡ/hợp nhất |
 | `Zone` — `Device` | Zone **1** : Device **0..*** | Mỗi Device thuộc một Zone trong baseline |
 | `Device` — `Sensor` | Device **1** : Sensor **0..*** | Thiết bị có nhiều cảm biến |
 | `Device` — `Actuator` | Device **1** : Actuator **0..*** | Thiết bị có nhiều bộ chấp hành |
@@ -196,7 +193,7 @@ Baseline cho biết một thiết bị thuộc **một Zone tại một thời �
 
 **BR-05 — Telemetry:** `eventId` không thay đổi khi retry; Backend chống trùng theo thiết bị và sự kiện, phân biệt `timestamp` với `receivedAt`, không dùng số đo không hợp lệ để ra lệnh AUTO.
 
-**BR-06 — Command:** xác thực quyền, kiểm tra hạn lệnh, tránh xử lý trùng `commandId`; `SENT` không có nghĩa relay đã thực thi. Ý nghĩa chính xác của `ACKNOWLEDGED` phải có trong đặc tả MQTT/API.
+**BR-06 — Command:** `SET_MODE` đổi AUTO/MANUAL; `SET_STATE` đặt ON/OFF chỉ khi actuator MANUAL và không vi phạm an toàn. Cần bổ sung `action` ở lớp (hiện sơ đồ chưa có); trường đích không dùng cho action tương ứng phải để `NULL`. Xác thực quyền, kiểm tra hạn lệnh, chống trùng `commandId`; `SENT` không có nghĩa relay đã thực thi. Command ACK phải phân biệt với Telemetry ACK và MQTT PUBACK.
 
 **BR-07 — Bird count:** `entryCount` và `exitCount` là số lượt; `detectCount` không được mặc định là quy mô đàn chim. `periodStart < periodEnd`.
 
@@ -215,9 +212,9 @@ Baseline cho biết một thiết bị thuộc **một Zone tại một thời �
 | Nội dung | Nơi chốt chi tiết | Phối hợp |
 |---|---|---|
 | GPIO, cảm biến, hysteresis, ESP32 offline và Buffer | IoT Architecture / MQTT Topic Specification | P1 + P4 |
-| Kiểu dữ liệu MQTT, `eventId`, ACK, `commandId` | MQTT Spec / REST API Spec | P1 + P3 + P4 |
+| Kiểu dữ liệu MQTT `event_id` ↔ Java `eventId`, ACK, `commandId` | MQTT Spec / REST API Spec | P1 + P3 + P4 |
 | Định nghĩa đếm Entry/Exit, `detectCount`, AI event | AI Architecture / Dataset Spec | P2 + P3 |
-| Ràng buộc `UNIQUE`, FK, nullable, index, cascade | ERD và Database Schema | P4 |
+| Ràng buộc `UNIQUE`, FK, nullable, index, cascade | ERD và Database Schema | P5 + P4 |
 | API Controller/Service/Repository, auth, transaction | Backend Architecture | P4 |
 | Web/Push và trạng thái gửi/đọc | Notification design / UI | P5 + P4 |
 | Công thức thống kê, phân tích tương quan, xuất file | FR-REP / Report design | P3 + P4 |
@@ -228,16 +225,19 @@ Không thể suy ra một thiết kế chi tiết chỉ từ đường nối UML
 
 Các điểm sau là **vấn đề tài liệu/triển khai cần xác minh**, không phải yêu cầu bắt buộc bổ sung tính năng:
 
-1. **`ZoneConfig` được vẽ hai lần với danh sách thuộc tính khác nhau:** cần thống nhất ô nào là bản đầy đủ.
-2. **`HouseRole` và `AggregationType` được dùng như kiểu dữ liệu nhưng không xuất hiện trong danh sách hộp Enum:** cần bổ sung chú giải hoặc tài liệu enum đã chốt.
+1. **`ZoneConfig` vẫn được vẽ hai lần với danh sách thuộc tính khác nhau:** dùng bản có đầy đủ các ngưỡng và chu kỳ; P3 cần hợp nhất thành một class/định nghĩa và giữ quan hệ Zone–ZoneConfig `1 : 0..1` theo ô gần Zone, trừ khi nhóm duyệt thay đổi.
+2. **`HouseRole`, `AggregationType`, `CommandAction` đã có ô Enum trong bản mới.** Tuy nhiên `CommandAction` chưa xuất hiện trong thuộc tính `ControlCommand` (thiếu `action: CommandAction`).
 3. **`+method(): Type` xuất hiện trong nhiều lớp:** đây có vẻ là placeholder của công cụ vẽ; không xem là phương thức nghiệp vụ thực tế.
-4. **Chưa thể hiện rõ nullable:** `ackAt`, `sentAt`, `handledAt`, `deliveredAt`, `manualUntil`, `failureReason`, `filePath` có thể chưa có giá trị ở nhiều giai đoạn; P4 cần định nghĩa trong ERD/API.
+4. **Chưa thể hiện rõ nullable:** quan trọng nhất là `ControlCommand.targetState/targetMode` (chỉ được dùng một trong hai tùy action), cùng `ackAt`, `sentAt`, `handledAt`, `deliveredAt`, `manualUntil`, `failureReason`, `filePath`; P3 cần ghi trên sơ đồ/đặc tả, P5 và P4 thực hiện trong ERD/JPA.
 5. **Vai trò toàn cục và vai trò House:** sơ đồ có cả `RoleName` và `HouseRole`, cần bảng quyền rõ ràng để không phân quyền sai.
-6. **`Device.online` phụ thuộc heartbeat/timeout:** cần thống nhất có lưu cột hay tính từ `lastSeenAt`.
+6. **`Device.online` phụ thuộc heartbeat/timeout:** nhóm đã chốt P1 gửi heartbeat **2 giây**; P4 timeout **6 giây**, scheduler **1 giây**. `online` là trạng thái Backend ghi nhận, không thay thế `ControlMode`.
 7. **Không thấy `DeviceZoneHistory`:** bản chốt chưa cam kết lưu lịch sử chuyển Zone; chỉ xử lý nếu FR xác nhận tính năng.
 8. **Sơ đồ dùng `String` cho `Sensor.kind`, `Alert.type`, `Report.type`:** đây là lựa chọn của baseline; Backend có thể validate theo danh mục nhưng không tự coi các trường là Enum.
 9. **Đường nối liên module dày:** kiểm tra cardinality trên file nguồn `.drawio` khi xuất ERD để tránh hiểu sai.
 10. **Chưa biểu diễn riêng luồng audio đo âm lượng, trạng thái đọc thông báo, thiết bị đang chờ gán Zone:** không tự thêm Entity nếu FR không yêu cầu.
+11. **`ControlCommand` còn thiếu `action` và hai target chưa đánh dấu nullable:** buộc sửa trước khi chốt migration cho `SET_MODE`/`SET_STATE`.
+12. **`AlertHistory` không có `actorType` trên class mới:** ERD có thể dùng `changed_by` nullable để biểu diễn System, nhưng nếu cần phân biệt tường minh USER/SYSTEM thì phải được nhóm chốt và sửa đồng bộ cả hai sơ đồ.
+13. **Các `+method(): Type` vẫn còn trong hình mới:** không được xem là API Java thật, nên loại khỏi bản bàn giao cuối.
 
 ## 9. Hồ sơ bàn giao DSN-06
 
@@ -245,10 +245,23 @@ Các tệp nên đi cùng một phiên bản thiết kế:
 
 ```text
  docs/design/class-diagram/
- ├── Class_Diagram.drawio       # nguồn chỉnh sửa được, nếu đã có
- ├── Class_Diagram.drawio.png   # ảnh sơ đồ bản chốt
- ├── overview.md               # tài liệu này
- └── review-checklist.md       # bảng kiểm nghiệm thu
+ ├── system-class-diagram.drawio  # nguồn chỉnh sửa được
+ ├── system-class-diagram.png     # ảnh từ đúng bản drawio
+ ├── overview.md                 # tài liệu này
+ └── review-checklist.md         # bảng kiểm nghiệm thu
 ```
 
 **Điều kiện nhất quán:** tên lớp/trường/enum trong ERD, API payload và các tài liệu của P1/P2/P4/P5 phải cùng ngữ nghĩa với bản class diagram đã chốt. Nếu phát hiện khác biệt, ghi rõ issue và người xác nhận; không âm thầm sửa baseline.
+
+## 10. Bảng đồng bộ P3 — P5 — P1/P4 trước BUILD
+
+| Ý nghĩa | Class Diagram P3 | MQTT P1 / Java P4 | ERD P5 | Trạng thái |
+|---|---|---|---|---|
+| Telemetry ID | `Telemetry.eventId` | JSON `event_id`, Java `eventId` | `telemetry.event_id` + UNIQUE `(device_id, event_id)` | Đã chốt tên; xác minh constraint trong migration |
+| Device ID | `Device.deviceId` | JSON `device_id` là mã chuỗi | `devices.device_id` unique; `telemetry.device_id` là FK BIGINT | Cần mapping DTO → Device.id |
+| Đổi chế độ | Enum `CommandAction.SET_MODE` | MQTT command `SET_MODE` | `control_commands.action`, `target_mode` | **Thiếu `action` trong class** |
+| Bật/tắt | Enum `CommandAction.SET_STATE` | MQTT command `SET_STATE` | `control_commands.action`, `target_state` | **Hai target phải nullable** |
+| Command ACK | `status: CommandStatus`, `ackAt` | `command_ack` từ ESP32 | `status`, `ack_at`, `failure_reason` | P1/P4 xác nhận ngữ nghĩa ACK |
+| Heartbeat | `Device.online`, `lastSeenAt` | 2s / timeout 6s / check 1s | `devices.online`, `last_seen_at` | Đã chốt quy trình, chưa chứng minh NFR |
+| Sensor lỗi | `SensorStatus` | Phép đo lỗi là `null` | Cột đo nullable | Đồng bộ logic; cần test |
+| ZoneConfig | Một class logic, vẽ trùng 2 vị trí | Cấu hình theo Zone | `zone_configs.zone_id` UNIQUE | **Phải hợp nhất ô trùng ở sơ đồ** |
