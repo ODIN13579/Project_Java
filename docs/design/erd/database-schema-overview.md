@@ -1,4 +1,6 @@
 # SwiftletCare — Database Schema Overview (đồng bộ bản ERD mới)
+
+> BUILD1-04 implementation: [mapping Entity/database MVP](build104-mvp-mapping.md). Baseline 17 tables and open decisions below remain the full-system design; implemented keys/types/indexes are listed separately.
   
 > **Trạng thái:** Ready for review; tài liệu mô tả **17 bảng** và ghi rõ những chỗ ERD vẫn phải sửa.
 

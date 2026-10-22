@@ -1,5 +1,7 @@
 # AI Event Specification — SwiftletCare
 
+> Thiết kế raw-event/anomaly cho giai đoạn sau, ngoài BUILD1-04. Backend MVP chưa có endpoint nhận payload snake_case bên dưới; chỉ nhận aggregate CountLog theo [contract MVP](../../api/build104-mvp.md). Giữ thiết kế này để review, không dùng làm request CountLog.
+
 ## 1. Lớp đối tượng và ngưỡng confidence
 
 | Đối tượng | `class_name` | Ngưỡng confidence |

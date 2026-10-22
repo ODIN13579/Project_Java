@@ -19,7 +19,7 @@
 6. **Aggregate CountLog:** [ĐỀ XUẤT phù hợp OpenAPI hiện tại] tích lũy dữ liệu theo khoảng `periodStart`, `periodEnd`; ghi `entryCount`, `exitCount`, `detectCount`, `aggregationType`, `processedAt`. Trong v1 **không cần API public cho từng raw crossing**.
 7. **Predator:** nếu class/độ tin cậy/ROI hợp lệ → tạo detection/sự kiện bất thường theo chính sách [TBD] (threshold + thời gian quan sát tối thiểu + cooldown). Không gửi mỗi frame thành một cảnh báo.
 8. **Evidence:** chọn snapshot và lưu ở phương án được duyệt (local filesystem/Object Storage). Backend giữ `snapshotPath`/reference; không mặc định URL công khai. [TBD] retention và quyền truy cập.
-9. **HTTP AI → Spring Boot:** gửi JSON tới hai endpoint nội bộ hiện có; API trả thành công mới coi là được tiếp nhận/lưu theo contract. Retry bị giới hạn, chống gửi trùng cần quyết định ở phần tích hợp.
+9. **HTTP AI → Spring Boot:** thiết kế tổng thể có CountLog và AnomalyEvent; **BUILD1-04 hiện chỉ có POST `/api/v1/internal/ai/count-logs`**. Gửi aggregate camelCase theo [contract MVP](../api/build104-mvp.md), X-Service-Key, camera Device.id dạng số. Unique theo device/type/window, giữ nguyên counts/processedAt khi retry: 201 mới, 200 retry giống, 409 khác nội dung. Không gửi raw crossing/event JSON vào endpoint này; anomaly và GET CountLog chưa triển khai.
 10. **Backend:** validate, DB transaction, công bố CountLog/Alert event sau commit; Dashboard lấy dữ liệu ban đầu bằng REST và cập nhật mới qua WebSocket.
 
 ## 3. Các trường hợp lỗi và hành động tối thiểu

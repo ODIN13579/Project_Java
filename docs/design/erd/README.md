@@ -6,6 +6,8 @@
 
 ## Các tài liệu
 
+**Backend BUILD1-04:** dùng [mapping Entity/database MVP](build104-mvp-mapping.md) để biết 7 bảng/6 entity đang triển khai, PostgreSQL, TIMESTAMPTZ, FK/unique/check/index và khác biệt cách map JPA. Bộ ERD 17 bảng bên dưới vẫn là thiết kế toàn hệ thống.
+
 | File | Mục đích |
 |---|---|
 | [`database-schema-overview.md`](database-schema-overview.md) | Danh sách bảng, quan hệ, mapping Class ↔ Table và các quyết định đã chốt |

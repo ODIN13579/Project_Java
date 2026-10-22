@@ -1,5 +1,7 @@
 # Sequence Specification – chi tiết và đối chiếu từng sơ đồ
 
+> Trạng thái BUILD1-04: CountLog đã dùng unique aggregate window và retry bất biến theo [contract MVP](../../api/build104-mvp.md); các mục TBD/OPEN bên dưới được giữ như baseline thiết kế tổng thể, không phủ nhận implementation này. Anomaly/control/alert vẫn ngoài MVP.
+
 ## Quy ước
 
 - Mermaid `.mmd` là biểu diễn tuần tự có `alt`, `opt`, `loop`; Draw.io cùng tên là bản đồ họa dễ điều chỉnh, **không thay cho flow branch trong Mermaid**.

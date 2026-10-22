@@ -28,6 +28,7 @@ tags:
 paths:
   /api/v1/auth/login:
     post:
+      x-build104-implemented: true
       tags:
       - Authentication
       operationId: login
@@ -44,7 +45,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenPairResponse'
+                $ref: '#/components/schemas/AccessTokenResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -57,6 +58,7 @@ paths:
         DSN-09.
   /api/v1/auth/refresh:
     post:
+      x-build104-implemented: false
       tags:
       - Authentication
       operationId: refreshToken
@@ -85,6 +87,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/auth/logout:
     post:
+      x-build104-implemented: false
       tags:
       - Authentication
       operationId: logout
@@ -117,6 +120,7 @@ paths:
         DSN-09.
   /api/v1/users/me:
     get:
+      x-build104-implemented: false
       tags:
       - Users
       operationId: getMyProfile
@@ -146,6 +150,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     patch:
+      x-build104-implemented: false
       tags:
       - Users
       operationId: updateMyProfile
@@ -182,6 +187,7 @@ paths:
         DSN-09.
   /api/v1/houses:
     get:
+      x-build104-implemented: false
       tags:
       - Houses
       operationId: listMyHouses
@@ -233,6 +239,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     post:
+      x-build104-implemented: false
       tags:
       - Houses
       operationId: createHouse
@@ -269,6 +276,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/houses/{houseId}:
     get:
+      x-build104-implemented: false
       tags:
       - Houses
       operationId: getHouse
@@ -306,6 +314,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     patch:
+      x-build104-implemented: false
       tags:
       - Houses
       operationId: updateHouse
@@ -350,6 +359,7 @@ paths:
         DSN-09.
   /api/v1/houses/{houseId}/members:
     get:
+      x-build104-implemented: false
       tags:
       - Memberships
       operationId: listHouseMembers
@@ -389,6 +399,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     post:
+      x-build104-implemented: false
       tags:
       - Memberships
       operationId: addHouseMember
@@ -433,6 +444,7 @@ paths:
         DSN-09.
   /api/v1/houses/{houseId}/members/{membershipId}:
     patch:
+      x-build104-implemented: false
       tags:
       - Memberships
       operationId: updateHouseMember
@@ -484,6 +496,7 @@ paths:
         DSN-09.
   /api/v1/houses/{houseId}/zones:
     get:
+      x-build104-implemented: false
       tags:
       - Zones
       operationId: listHouseZones
@@ -523,6 +536,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     post:
+      x-build104-implemented: false
       tags:
       - Zones
       operationId: createZone
@@ -567,6 +581,7 @@ paths:
         DSN-09.
   /api/v1/zones/{zoneId}:
     get:
+      x-build104-implemented: false
       tags:
       - Zones
       operationId: getZone
@@ -604,6 +619,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     patch:
+      x-build104-implemented: false
       tags:
       - Zones
       operationId: updateZone
@@ -648,6 +664,7 @@ paths:
         DSN-09.
   /api/v1/zones/{zoneId}/devices:
     get:
+      x-build104-implemented: true
       tags:
       - Devices
       operationId: listZoneDevices
@@ -687,6 +704,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     post:
+      x-build104-implemented: false
       tags:
       - Devices
       operationId: registerDevice
@@ -730,6 +748,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/devices/{deviceId}:
     get:
+      x-build104-implemented: true
       tags:
       - Devices
       operationId: getDevice
@@ -766,6 +785,7 @@ paths:
       x-requirement-group: FR-DEVICE/IOT
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
     patch:
+      x-build104-implemented: false
       tags:
       - Devices
       operationId: updateDevice
@@ -810,6 +830,7 @@ paths:
         DSN-09.
   /api/v1/devices/{deviceId}/actuators:
     get:
+      x-build104-implemented: false
       tags:
       - Actuators
       operationId: listDeviceActuators
@@ -850,6 +871,7 @@ paths:
         DSN-09.
   /api/v1/devices/{deviceId}/telemetry/latest:
     get:
+      x-build104-implemented: true
       tags:
       - Telemetry
       operationId: getLatestTelemetry
@@ -898,6 +920,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/devices/{deviceId}/telemetry:
     get:
+      x-build104-implemented: true
       tags:
       - Telemetry
       operationId: listTelemetry
@@ -953,6 +976,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/zones/{zoneId}/config:
     get:
+      x-build104-implemented: false
       tags:
       - Zone Configuration
       operationId: getZoneConfig
@@ -990,6 +1014,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     put:
+      x-build104-implemented: false
       tags:
       - Zone Configuration
       operationId: upsertZoneConfig
@@ -1034,6 +1059,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/actuators/{actuatorId}/commands:
     post:
+      x-build104-implemented: false
       tags:
       - Control Commands
       operationId: createControlCommand
@@ -1102,6 +1128,7 @@ paths:
       x-requirement-group: FR-IOT/CONTROL
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
     get:
+      x-build104-implemented: false
       tags:
       - Control Commands
       operationId: listControlCommands
@@ -1142,6 +1169,7 @@ paths:
         DSN-09.
   /api/v1/commands/{commandId}:
     get:
+      x-build104-implemented: false
       tags:
       - Control Commands
       operationId: getControlCommand
@@ -1179,11 +1207,12 @@ paths:
         DSN-09.
   /api/v1/internal/ai/count-logs:
     post:
+      x-build104-implemented: true
       tags:
       - AI Events
       operationId: ingestCountLog
       summary: AI Service ghi kết quả đếm tổng hợp
-      description: P2/P4 must agree how to deduplicate retries; source event id absent from current ERD.
+      description: BUILD1-04 immutable aggregate key is (deviceId, aggregationType, periodStart, periodEnd). Identical retry returns 200; changed content returns 409. See build104-mvp.md for the MVP decision pending cross-review.
       requestBody:
         required: true
         content:
@@ -1191,6 +1220,16 @@ paths:
             schema:
               $ref: '#/components/schemas/CountLogIngestRequest'
       responses:
+        '200':
+          description: Identical retry of previously committed aggregate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountLogResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: Database unavailable
         '201':
           description: Created
           content:
@@ -1212,6 +1251,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/internal/ai/anomalies:
     post:
+      x-build104-implemented: false
       tags:
       - AI Events
       operationId: ingestAnomalyEvent
@@ -1245,6 +1285,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/devices/{deviceId}/count-logs:
     get:
+      x-build104-implemented: false
       tags:
       - AI Events
       operationId: listCountLogs
@@ -1287,6 +1328,7 @@ paths:
         DSN-09.
   /api/v1/zones/{zoneId}/anomalies:
     get:
+      x-build104-implemented: false
       tags:
       - AI Events
       operationId: listZoneAnomalies
@@ -1329,6 +1371,7 @@ paths:
         DSN-09.
   /api/v1/anomalies/{anomalyId}:
     get:
+      x-build104-implemented: false
       tags:
       - AI Events
       operationId: getAnomaly
@@ -1367,6 +1410,7 @@ paths:
         DSN-09.
   /api/v1/alerts:
     get:
+      x-build104-implemented: false
       tags:
       - Alerts
       operationId: listAlerts
@@ -1420,6 +1464,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/alerts/{alertId}:
     get:
+      x-build104-implemented: false
       tags:
       - Alerts
       operationId: getAlert
@@ -1458,6 +1503,7 @@ paths:
         DSN-09.
   /api/v1/alerts/{alertId}/status:
     patch:
+      x-build104-implemented: false
       tags:
       - Alerts
       operationId: changeAlertStatus
@@ -1502,6 +1548,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/alerts/{alertId}/history:
     get:
+      x-build104-implemented: false
       tags:
       - Alerts
       operationId: getAlertHistory
@@ -1542,6 +1589,7 @@ paths:
         DSN-09.
   /api/v1/notifications:
     get:
+      x-build104-implemented: false
       tags:
       - Notifications
       operationId: listMyNotifications
@@ -1574,6 +1622,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/zones/{zoneId}/harvest-logs:
     get:
+      x-build104-implemented: false
       tags:
       - Harvest
       operationId: listHarvestLogs
@@ -1615,6 +1664,7 @@ paths:
       description: Design endpoint for BUILD, subject to validation, authorization and cross-review as documented in
         DSN-09.
     post:
+      x-build104-implemented: false
       tags:
       - Harvest
       operationId: createHarvestLog
@@ -1659,6 +1709,7 @@ paths:
         DSN-09.
   /api/v1/reports/environment:
     get:
+      x-build104-implemented: false
       tags:
       - Statistics & Reports
       operationId: getEnvironmentStats
@@ -1708,6 +1759,7 @@ paths:
         DSN-09.
   /api/v1/reports/bird-count:
     get:
+      x-build104-implemented: false
       tags:
       - Statistics & Reports
       operationId: getBirdCountStats
@@ -1742,6 +1794,7 @@ paths:
         DSN-09.
   /api/v1/reports/productivity-correlation:
     get:
+      x-build104-implemented: false
       tags:
       - Statistics & Reports
       operationId: getProductivityCorrelation
@@ -1786,6 +1839,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/reports:
     post:
+      x-build104-implemented: false
       tags:
       - Statistics & Reports
       operationId: createReport
@@ -1821,6 +1875,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/reports/{reportId}:
     get:
+      x-build104-implemented: false
       tags:
       - Statistics & Reports
       operationId: getReportMetadata
@@ -1859,6 +1914,7 @@ paths:
         DSN-09.
   /api/v1/reports/{reportId}/download:
     get:
+      x-build104-implemented: false
       tags:
       - Statistics & Reports
       operationId: downloadReport
@@ -1897,6 +1953,7 @@ paths:
       x-api-spec-status: PROPOSED_NEEDS_REVIEW
   /api/v1/dashboard/summary:
     get:
+      x-build104-implemented: false
       tags:
       - Dashboard
       operationId: getDashboardSummary
@@ -2124,6 +2181,20 @@ components:
       required:
       - email
       - password
+      additionalProperties: false
+    AccessTokenResponse:
+      type: object
+      description: BUILD1-04 minimal JWT login. No refresh/logout; login also sets HttpOnly SC_WS cookie for same-site WebSocket.
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          enum: [Bearer]
+        expiresIn:
+          type: integer
+          example: 900
+      required: [accessToken, tokenType, expiresIn]
       additionalProperties: false
     TokenPairResponse:
       type: object
@@ -2748,7 +2819,7 @@ components:
       - detectCount
       - aggregationType
       - processedAt
-      description: Idempotency key for repeated AI submissions is not defined in the current Entity/ERD; pending P2/P4/P5.
+      description: BUILD1-04 uses unique (deviceId, aggregationType, periodStart, periodEnd). Counts and processedAt must be identical on retry; corrections conflict with 409. Timestamps normalize to microseconds. See build104-mvp.md.
       additionalProperties: false
     AnomalyEventResponse:
       type: object

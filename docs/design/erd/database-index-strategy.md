@@ -1,5 +1,7 @@
 # SwiftletCare — Database Index Strategy (đồng bộ ERD mới)
 
+> BUILD1-04 implementation: [mapping Entity/database MVP](build104-mvp-mapping.md). Baseline 17 tables and open decisions below remain the full-system design; implemented keys/types/indexes are listed separately.
+
 > **Nguyên tắc:** Chỉ tạo các index thật sự phục vụ demo Java Spring Boot trong BUILD. Các index bổ sung phải dựa trên câu SQL/API thực tế và kết quả `EXPLAIN`.
 
 ## 1. Nhóm index bắt buộc / quan trọng

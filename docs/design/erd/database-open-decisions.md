@@ -1,5 +1,7 @@
 # SwiftletCare — Database Decisions & Open Issues (sau đối chiếu Class/ERD mới)
 
+> BUILD1-04 implementation: [mapping Entity/database MVP](build104-mvp-mapping.md). Baseline 17 tables and open decisions below remain the full-system design; implemented keys/types/indexes are listed separately.
+
 > Các quyết định ở đây phân biệt **đã chốt**, **lỗi cần sửa**, **chưa chốt**. Chỉ thay đổi trạng thái khi người phụ trách xác nhận và đã cập nhật sơ đồ `.drawio`.
 
 ## 1. Các quyết định đã chốt trong thiết kế IoT/đang có trên hình

@@ -1,5 +1,7 @@
 ## 1. Mục tiêu và cách sử dụng
 
+**Đối chiếu BUILD1-04:** xem [mapping Entity/database hiện hành](../erd/build104-mvp-mapping.md). Sơ đồ giữ nguyên domain toàn hệ thống; backend MVP mới có 6 entity JPA, FK scalar Long và trường enum dạng String/CHECK, không phải toàn bộ object relation hoặc 17 entity đã được triển khai.
+
 Tài liệu này giải thích các lớp nghiệp vụ chính, trách nhiệm của từng lớp, kiểu dữ liệu, các quan hệ và các quy tắc cần tuân thủ khi triển khai SwiftletCare. Đây là **Domain/Entity Class Diagram**; không phải sơ đồ triển khai chi tiết các `Controller`, `Service`, `Repository` của Spring Boot, không phải ERD, và không mô tả thuật toán bên trong firmware ESP32 hay YOLO/ByteTrack.
 
 **Nguyên tắc nguồn sự thật:** sơ đồ mới là nguồn cho các thuộc tính *đang hiển thị*. Các quyết định tích hợp P1–P4 đã xác nhận (ví dụ `event_id`, heartbeat) được ghi riêng. Khi sơ đồ còn thiếu thuộc tính hoặc thông tin nullable, tài liệu đánh dấu **CẦN SỬA SƠ ĐỒ**, không giả định là đã sửa xong.

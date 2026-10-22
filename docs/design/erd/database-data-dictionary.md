@@ -1,5 +1,7 @@
 # SwiftletCare — Database Data Dictionary (ERD 17 bảng)
 
+> BUILD1-04 implementation: [mapping Entity/database MVP](build104-mvp-mapping.md). Baseline 17 tables and open decisions below remain the full-system design; implemented keys/types/indexes are listed separately.
+
 > **Baseline:** `Class Diagram(1).png` + `database-erd(1).png`. Kiểu VARCHAR/DOUBLE/TIMESTAMP và độ dài trong bảng dưới là **đề xuất để triển khai**, chưa phải DDL được chạy.  
 > **Quyết định IoT:** MQTT Telemetry `event_id`, Heartbeat 2s, timeout 6s, Scheduler 1s.  
 > **Quy tắc:** `OPEN` = phần chưa được nhóm xác nhận; `NULL` = nullable được đề xuất hoặc nhìn thấy trên ERD (xem mô tả cụ thể).

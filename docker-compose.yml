@@ -16,5 +16,35 @@ services:
       retries: 10
       start_period: 10s
 
+  mqtt:
+    image: eclipse-mosquitto:2
+    ports:
+      - "127.0.0.1:${MQTT_PORT:-1883}:1883"
+    volumes:
+      - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h localhost -t health -m probe"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  backend:
+    profiles: [app]
+    build: ./backend
+    ports:
+      - "127.0.0.1:${SERVER_PORT:-8080}:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-swiftletcare}
+      DB_USERNAME: ${POSTGRES_USER:-swiftletcare}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:-}
+      AI_SERVICE_KEY: ${AI_SERVICE_KEY:-}
+      MQTT_URL: tcp://mqtt:1883
+      FRONTEND_ORIGINS: ${FRONTEND_ORIGINS:-http://localhost:5173}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mqtt:
+        condition: service_healthy
+
 volumes:
   postgres_data:

@@ -12,6 +12,10 @@ Thiết kế REST API cho React ↔ Spring Boot và AI Service → Spring Boot, 
 
 ## Nội dung bàn giao
 
+**Tích hợp BUILD1-04:** bắt đầu bằng [contract MVP](build104-mvp.md) và [mapping Entity/database đã triển khai](../design/erd/build104-mvp-mapping.md). Backend hiện có **6 REST operation** và một endpoint plain WebSocket. Catalog có cột trạng thái thực thi; OpenAPI có `x-build104-implemented`. Nhãn ưu tiên `MVP` của thiết kế toàn hệ thống không đồng nghĩa endpoint đã được triển khai trong BUILD1-04.
+
+Login trả `AccessTokenResponse` (`accessToken`, `tokenType`, `expiresIn=900`), không có refresh token. AI chỉ ingest aggregate CountLog qua service key; chưa có anomaly hoặc GET CountLog. WebSocket/React dùng hướng dẫn cookie/origin trong contract MVP. Swagger UI chưa được cài trong backend này.
+
 | File | Mục đích |
 |---|---|
 | `openapi.yaml` | **Nguồn contract chính** cho 47 operation, 36 path; request/response DTO, auth, lỗi và ví dụ chính |

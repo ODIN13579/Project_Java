@@ -2,6 +2,8 @@
 
 ## 1. Nguồn sự thật theo chiều giao tiếp
 
+**BUILD1-04:** bảng dưới giữ thiết kế toàn hệ thống. Implementation thực tế là `Ingestion`/`MqttGateway`, `DeviceController`, `CountController`, `Access` và `Realtime`; endpoint đang có được đánh dấu trong [catalog](api-endpoint-catalog.md). CountLog POST đã dùng unique aggregate window và X-Service-Key theo [contract MVP](build104-mvp.md); GET count logs/statistics, control/config/alert/report chưa có. Java MQTT DTO MVP giữ tên record snake_case, Entity/REST vẫn dùng eventId camelCase.
+
 | Tình huống | Web/REST | Service Java | Bảng/Entity | MQTT/AI/Realtime | Ai xác nhận |
 |---|---|---|---|---|---|
 | Xem dữ liệu cảm biến | GET latest/history | TelemetryService | `Telemetry` + `Device` | ESP32 `telemetry` → Java MQTT Handler; `telemetry_ack` sau commit | P1/P4 |
@@ -54,7 +56,7 @@ Nếu lỗi MQTT xảy ra trước lúc phát lệnh, P4 phải chốt chính s�
 ## 5. Ranh giới team
 
 - **P1:** MQTT payload/topic, ESP32/Wokwi, telemetry/command/ACK/Heartbeat, Relay simulation.
-- **P2:** AI data definition, CountLog and AnomalyEvent internal API, source dedup TBD.
+- **P2:** CountLog aggregate và retry theo key MVP đã triển khai; AnomalyEvent/raw-event source dedup vẫn TBD, ngoài BUILD1-04.
 - **P3:** API contract, FR/Use Case mapping, Class Diagram, review.
 - **P4:** Spring Boot Controllers/DTOs/Services/Security/MQTT Adapter/JPA, SQL migrations.
 - **P5:** React API consumption, Dashboard, ERD constraints/data dictionary.

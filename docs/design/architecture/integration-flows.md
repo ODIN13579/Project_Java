@@ -1,5 +1,7 @@
 # SwiftletCare — Integration Flows
 
+> Trạng thái BUILD1-04: các flow vẫn là thiết kế toàn hệ thống. Chỉ Telemetry/Heartbeat, Device/Telemetry read, CountLog ingest, JWT tối thiểu và ba WS event được triển khai theo [contract MVP](../../api/build104-mvp.md). CountLog dùng X-Service-Key và unique aggregate window; các mục OPEN/TBD phía dưới còn là baseline/sign-off rộng hơn. Không suy ra đã có GET CountLog, House/Zone, control/alert/report/anomaly.
+
 > **Phạm vi:** Mô tả các luồng tích hợp giữa thiết bị, MQTT, Spring Boot, AI, dữ liệu và Web.  
 > **Quy tắc:** Phân biệt *luồng trên hình* với *cơ chế chi tiết đề xuất trong tài liệu giao tiếp*. Sơ đồ tổng thể không thay thế đặc tả MQTT, OpenAPI hoặc Sequence Diagram chi tiết.
 

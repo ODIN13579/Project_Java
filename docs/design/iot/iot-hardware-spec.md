@@ -104,11 +104,10 @@ Dashboard → Java Spring Boot → MQTT Broker → ESP32 → GPIO/Relay (mô ph�
 | Telemetry ID | **`event_id`** duy nhất theo thiết bị và bản ghi | Quyết định của nhóm |
 | Thời gian | ISO 8601 UTC trong payload | MQTT Contract |
 
-Ví dụ Telemetry khi CO₂ lỗi (schema đầy đủ xem `mqtt-payload-schema.md`):
+Ví dụ Telemetry BUILD1-04 khi CO₂ lỗi (schema hiện hành: [MQTT topics/payload](../../mqtt/topics.md); không gửi thêm schemaVersion vì DTO MVP từ chối trường lạ):
 
 ```json
 {
-  "schemaVersion": 1,
   "event_id": "ESP32-01-000002",
   "device_id": "ESP32-01",
   "timestamp": "2026-10-18T02:30:05Z",

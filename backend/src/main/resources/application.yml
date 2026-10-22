@@ -1,4 +1,7 @@
 spring:
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
   application:
     name: swiftletcare-backend
   datasource:
@@ -37,3 +40,21 @@ management:
       group:
         readiness:
           include: readinessState,db
+app:
+  jwt-secret: ${JWT_SECRET}
+  ai-service-key: ${AI_SERVICE_KEY}
+  origins: ${FRONTEND_ORIGINS:http://localhost:5173}
+  secure-cookie: ${SECURE_COOKIE:false}
+  heartbeat-timeout-ms: ${HEARTBEAT_TIMEOUT_MS:6000}
+  status-scan-ms: ${STATUS_SCAN_MS:1000}
+  mqtt:
+    enabled: ${MQTT_ENABLED:true}
+    url: ${MQTT_URL:tcp://localhost:1883}
+    client-id: ${MQTT_CLIENT_ID:swiftletcare-backend}
+    username: ${MQTT_USERNAME:}
+    password: ${MQTT_PASSWORD:}
+
+# Keep HTTP body logging off: login responses contain credentials even in debug mode.
+logging:
+  level:
+    org.springframework.web: INFO

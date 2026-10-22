@@ -1,5 +1,7 @@
 # SwiftletCare — Database Constraints & Data Integrity
 
+> BUILD1-04 implementation: [mapping Entity/database MVP](build104-mvp-mapping.md). Baseline 17 tables and open decisions below remain the full-system design; implemented keys/types/indexes are listed separately.
+
 > **Trạng thái:** Quy tắc áp dụng cho ERD 17 bảng phiên bản mới. Những ràng buộc không thể hiện trên ảnh được đánh dấu **đề xuất cho migration**, không tự xem là đã tồn tại trong Database.
 
 ## 1. Khóa chính, khóa ngoại

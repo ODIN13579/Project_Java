@@ -1,0 +1,29 @@
+﻿services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: build104_test
+      POSTGRES_USER: build104
+      POSTGRES_PASSWORD: build104-test-only
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U build104 -d build104_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - build104_test_data:/var/lib/postgresql/data
+  mqtt:
+    image: eclipse-mosquitto:2
+    ports:
+      - "127.0.0.1:51883:1883"
+    volumes:
+      - ./infra/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h localhost -t health -m probe"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  build104_test_data:

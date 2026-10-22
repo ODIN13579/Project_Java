@@ -15,3 +15,9 @@ DSN-05 đã chốt **WebSocket truyền cập nhật, REST và Database là ngu�
 - UI nhận WS phải phân biệt realtime event với response REST; sau reconnect, dùng REST GET để lấy phần bị mất và loại trùng theo `eventId`/`commandId`.
 - Heartbeat 2s không có nghĩa WebSocket gửi một bản status mỗi 2s; chỉ phát `device.status.changed` khi trạng thái thật sự đổi.
 - Không đưa URL WebSocket giả định thành “đã chốt”; endpoint handshake và STOMP/plain websocket sẽ được P4/P5 ghi bổ sung.
+
+## Triển khai BUILD1-04
+
+Plain WebSocket `/ws/devices/{deviceId}`, envelope `{type,data}`, xác thực cookie JWT HttpOnly hoặc Bearer header, scope HouseMembership. Chi tiết schema, origin và ví dụ browser: [build104-mvp.md](build104-mvp.md). Đây là lựa chọn MVP thay cho phần handshake còn mở ở bản đề xuất trên.
+
+Chỉ telemetry.updated, device.status.changed và ai.count.updated đã có trong MVP. Command/alert và availability/LWT ở bảng đề xuất thuộc giai đoạn sau. GET latest/history để catch-up hiện chỉ có cho Telemetry; chưa có GET CountLog để bù sự kiện AI bị lỡ.

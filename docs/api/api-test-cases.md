@@ -2,6 +2,8 @@
 
 > Đây là các test case **thiết kế** để triển khai trong BUILD; tất cả trạng thái mặc định `NOT RUN`, không khẳng định đã có server hoặc test đã PASS.
 
+Kết quả chạy backend BUILD1-04 được ghi riêng trong [báo cáo thực tế](build104-verification.md); không tự đổi các testcase liên nhóm/UI/firmware dưới đây thành PASS. Phạm vi API có code: [catalog](api-endpoint-catalog.md), [contract MVP](build104-mvp.md).
+
 | ID | Tình huống / HTTP | Kỳ vọng | Phụ trách | Trạng thái |
 |---|---|---|---|---|
 | API-T01 | POST login đúng thông tin | 200, JWT, không lộ passwordHash | P4 | NOT RUN |
@@ -22,7 +24,7 @@
 | API-T16 | Command ACK timeout | Trạng thái lỗi rõ, không báo thành công | P1/P4 | NOT RUN |
 | API-T17 | P2 POST AI CountLog hợp lệ | 201, count_log được lưu, CAMERA hợp lệ | P2/P4 | NOT RUN |
 | API-T18 | Browser JWT gọi `/internal/ai/anomalies` | 401/403 nếu thiếu service credential | P2/P4 | NOT RUN |
-| API-T19 | AI post duplicate từ P2 | Theo idempotency đã chốt; chưa có phương án final | P2/P4 | NOT RUN |
+| API-T19 | AI post duplicate từ P2 | BUILD1-04 CountLog: unique device/type/window; retry giống 200, khác counts/processedAt 409. Anomaly/raw event vẫn TBD | P2/P4 | NOT RUN |
 | API-T20 | PATCH Alert status | Alert và AlertHistory cùng transaction | P3/P4 | NOT RUN |
 | API-T21 | P5 GET Notification | `DELIVERED` không biến thành `READ` | P4/P5 | NOT RUN |
 | API-T22 | GET report environment | Trả aggregation theo interval và quyền Zone | P4/P5 | NOT RUN |

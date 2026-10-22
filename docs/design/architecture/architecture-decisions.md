@@ -7,6 +7,8 @@
 
 ## 1. Quy ước
 
+**Ghi chú triển khai BUILD1-04:** PostgreSQL 17/Flyway V1–V2, Mosquitto 2, JWT access token và plain WebSocket đã được chọn cho MVP. Đây là trạng thái implementation, không tự đổi trạng thái sign-off thiết kế tổng thể trong bảng dưới. Mapping cụ thể: [Entity/database MVP](../erd/build104-mvp-mapping.md); phạm vi giao tiếp: [contract MVP](../../api/build104-mvp.md).
+
 - `CONFIRMED`: quyết định thiết kế đã được xác nhận trong kiến trúc/hợp đồng giao tiếp hiện có.
 - `PROPOSED`: công nghệ hoặc cách tổ chức được thể hiện dưới dạng phương án, đặc biệt khi có dấu `(*)`.
 - `OPEN`: thông số hoặc phạm vi chưa được quy định đủ.

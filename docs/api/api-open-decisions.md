@@ -2,6 +2,17 @@
 
 **Phân loại:** `CONFIRMED` = quyết định đã được người dùng/thiết kế gần nhất chốt; `PROPOSED` = nhóm cần duyệt; `BLOCKER` = cần chốt trước khi hai bên lập trình tích hợp.
 
+## Quyết định triển khai BUILD1-04 (không thay sign-off thiết kế toàn hệ thống)
+
+- API-D07: PostgreSQL 17, Flyway V1/V2, IDENTITY BIGINT, TIMESTAMPTZ/Instant UTC đã được dùng cho MVP; xem [mapping](../design/erd/build104-mvp-mapping.md).
+- API-D08/D18/D19: đọc theo active HouseMembership, global role không vượt quyền House; REST dùng PK số; AI dùng X-Service-Key chung, chưa scope riêng camera/producer.
+- API-D10: login AccessTokenResponse, HS256/15 phút, `expiresIn`; chưa triển khai refresh/logout/revocation.
+- API-D11/D21: page 0, size 20, max 100; `{items,page}`; validation 400, conflict 409, lỗi database/transaction 503 trong các API MVP.
+- API-D16: CountLog đã có unique aggregate window `(deviceId,aggregationType,periodStart,periodEnd)`, retry giữ counts và processedAt; raw-event/anomaly vẫn mở và ngoài BUILD1-04.
+- API-D24: plain WS `/ws/devices/{deviceId}`, cookie JWT HttpOnly hoặc Bearer header, envelope `{type,data}`; chưa có STOMP/SockJS. Ba event MVP: telemetry.updated, device.status.changed, ai.count.updated.
+
+Các lựa chọn triển khai này nằm trong [contract MVP](build104-mvp.md), vẫn cần cross-review liên nhóm. Bảng dưới giữ nguyên lịch sử quyết định của thiết kế rộng hơn; không dùng trạng thái cũ để suy ra backend MVP chưa có implementation.
+
 | ID | Nội dung | Tình trạng | Hướng hiện tại | Chủ trì / Review |
 |---|---|---|---|---|
 | API-D01 | MQTT Telemetry tên `event_id`, Java `eventId` | CONFIRMED | REST DTO `eventId`, DB `event_id` | P1/P4 |

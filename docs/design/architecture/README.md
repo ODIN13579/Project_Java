@@ -62,10 +62,10 @@ Các giải pháp có dấu `(*)` trên sơ đồ — ví dụ Mosquitto, Postgr
 ## 6. Tài liệu kiến trúc liên quan
 
 - `../iot/`: kiến trúc firmware, cảm biến, điều khiển, offline/recovery.
-- `../iot/`: đặc tả MQTT Topic, Payload, ACK, QoS, Retain/LWT.
+- [MQTT contract MVP](../../mqtt/topics.md): Topic, Payload, ACK, QoS; Retain/LWT ngoài phạm vi được ghi rõ.
 - `../backend/`: cấu trúc Spring Boot, security, MQTT ingestion.
-- `../class-diagram/`: các Entity và quan hệ đối tượng.
-- `../database/`: ERD, data dictionary, constraints.
-- `../rest-api/`: OpenAPI, DTO và WebSocket contract.
+- [Class Diagram](../class/class-diagram-overview.md): các Entity và quan hệ đối tượng.
+- [ERD](../erd/README.md), [mapping MVP](../erd/build104-mvp-mapping.md): database triển khai và thiết kế tổng thể.
+- [API](../../api/README.md), [contract MVP](../../api/build104-mvp.md): OpenAPI, DTO và WebSocket.
 
 Các đường dẫn này là vị trí tham chiếu dự kiến theo cấu trúc repository; chỉnh lại nếu thư mục thực tế khác.

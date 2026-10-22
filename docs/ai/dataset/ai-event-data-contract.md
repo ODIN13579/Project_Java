@@ -4,6 +4,8 @@
 
 Đề xuất hợp đồng dữ liệu giữa AI Service/Edge Node và Backend. Đây là **draft để P2 và P4 thống nhất**, chưa phải API chính thức của TASK-05. Chi tiết endpoint, authentication và transport do Backend chốt riêng.
 
+**Ngoài payload ingest BUILD1-04:** các raw event/cameraId/zoneId bên dưới vẫn là thiết kế cho giai đoạn sau. Backend MVP chỉ nhận aggregate CountLog với `deviceId` số, periodStart/periodEnd, counts, aggregationType và processedAt; xem [contract đang triển khai](../../api/build104-mvp.md). Không POST JSON của tài liệu này vào CountLog.
+
 Nguyên tắc:
 - Mỗi event có ID ổn định để chống xử lý trùng.
 - Timestamp ISO 8601 có timezone; khuyến nghị UTC (`Z`) khi truyền.
