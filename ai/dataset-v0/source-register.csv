@@ -1,0 +1,3 @@
+source_id,filename,source_url_or_owner,license_or_permission,collection_date,notes,status
+SRC-001,../samples/sample.mp4,Provided in uploaded AI Service ZIP,Unknown,Unknown,"Local sample video; original author/license and permission need confirmation before redistribution or public use",needs_verification
+SRC-002,yolov8n.pt,Ultralytics YOLOv8n pretrained model,Check upstream model/license terms before redistribution,Unknown,"Used only as pretrained baseline; not fine-tuned on SwiftletCare data",baseline_model

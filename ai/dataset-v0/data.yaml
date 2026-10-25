@@ -1,0 +1,10 @@
+path: .
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: swiftlet
+  1: snake
+  2: rat
+  3: owl
