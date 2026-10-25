@@ -1,6 +1,15 @@
+# .env
+# .env.*
+# !.env.example
+# backend/logs/
+# backend/target/
+# *.log
 .env
-.env.*
-!.env.example
-backend/logs/
-backend/target/
-*.log
+ai/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+ai/logs/
+ai/outputs/
+ai/annotated.mp4
+ai/test_counting.py.bak
